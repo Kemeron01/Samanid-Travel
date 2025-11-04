@@ -1,10 +1,11 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr, Field
+
 
 class UserCreate(BaseModel):
     full_name: str
-    phone_number: str | None=None
+    phone_number: str | None = None
     email: EmailStr
-    password: constr(min_length=8, max_length=128)
+    password: str = Field(..., min_length=8, max_length=128)
 
 class UserResponse(BaseModel):
     id: int
@@ -13,4 +14,8 @@ class UserResponse(BaseModel):
     is_verified: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+class UserLog(BaseModel):
+    email : EmailStr
+    password : str 
+    
