@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from . import models, schemas, utils, database
+from ..db import models, database
 from sqlalchemy.exc import NoResultFound
-
+from . import schemas, utils
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
@@ -36,7 +36,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user()
+    return new_user
 
 
 @router.post("/login", response_model=schemas.UserLog)
