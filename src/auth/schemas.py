@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
+import uuid, datetime
 
 
 class UserCreate(BaseModel):
@@ -8,14 +9,33 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
 
 class UserResponse(BaseModel):
-    id: int
+    uid: uuid
     full_name: str
     email: EmailStr
     is_verified: bool
 
     class Config:
         from_attributes = True
-class UserLog(BaseModel):
-    email : EmailStr
-    password : str 
+        
+class UserModel (BaseModel):
+    uid: uuid
+    full_name: str
+    email: EmailStr
+    is_verified: bool
+    password_hash: str = Field (exclude=True)
+    created_at: datetime
+    updated_at: datetime
     
+class UserLoginModel(BaseModel):
+    email : EmailStr
+    password : str = Field(..., min_length=8, max_length=128)
+    
+class EmailverificationModel(BaseModel):
+    verification_code: int
+    
+class PasswordResetRequestModel(BaseModel):
+    email : EmailStr
+
+class PasswordResetConfirmModel(BaseModel):
+    new_password: str = Field(..., min_length=8, max_length=128)
+    confirm_new_password: str  

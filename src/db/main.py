@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .import models, database
-from ..auth.auth import router as auth_router
+from ..auth.routes import router as auth_router
 
 models.Base.metadata.create_all(bind=database.engine)
 
