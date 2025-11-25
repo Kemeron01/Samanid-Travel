@@ -17,3 +17,6 @@ app.include_router(auth_router)
 @app.get("/")
 def root():
     return {"message":"API is working"}
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async_session = async_sessionmaker()
