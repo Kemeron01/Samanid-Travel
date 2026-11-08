@@ -1,0 +1,12 @@
+{
+  "name": "@samanid/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./src/tokens.css",
+    "./theme.css": "./src/theme.css",
+    "./tokens.json": "./src/tokens.json"
+  },
+  "files": ["src"]
+}

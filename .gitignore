@@ -9,3 +9,10 @@
 src/__pycache__/
 src/.DS_Store
 .env
+# frontend
+node_modules/
+.next/
+.turbo/
+dist/
+storybook-static/
+*.tsbuildinfo

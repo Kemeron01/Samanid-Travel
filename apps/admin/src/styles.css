@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import '@samanid/tokens/theme.css';
+@source '../../../packages/ui/src';
+@theme { --font-manrope: 'Manrope Variable'; }
+@layer base { body { background: var(--color-bg-page); color: var(--color-dark-900); } :focus-visible { box-shadow: var(--focus-ring); outline: none; } }

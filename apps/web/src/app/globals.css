@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import '@samanid/tokens/theme.css';
+@source '../../../../packages/ui/src';
+@source '../components';
+@source './';
+
+@layer base {
+  body { background: var(--color-bg-page); color: var(--color-dark-900); overflow-x: clip; }
+  :focus-visible { box-shadow: var(--focus-ring); outline: none; }
+}
