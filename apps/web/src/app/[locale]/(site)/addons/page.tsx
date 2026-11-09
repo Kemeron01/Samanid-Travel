@@ -14,9 +14,9 @@ export default async function AddonsPage({ params }: { params: Promise<{ locale:
   const { locale } = await params; setRequestLocale(locale);
   const [addons, t] = [await api.addons(), await getTranslations({ locale, namespace: 'addonsPage' })];
   return (
-    <PageContainer className="pt-6 pb-48 md:pt-12 md:pb-24">
-      <h1 className="text-h2 text-dark-900 md:text-h1">{t('title')}</h1>
-      <p className="mt-2 mb-6 text-body-m text-dark-600 md:mb-8 md:text-body-l">{t('subtitle')}</p>
+    <PageContainer className="pt-5 pb-12 md:pt-8 md:pb-24">
+      <h1 className="text-h2 text-dark-900 max-md:mb-3 md:text-h1">{t('title')}</h1>
+      <p className="mt-2 text-body-l text-dark-500 max-md:sr-only md:mb-8">{t('subtitle')}</p>
       <AddonsBoard addons={addons} />
     </PageContainer>
   );

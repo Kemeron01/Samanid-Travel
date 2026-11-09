@@ -33,6 +33,7 @@ export default async function TourPage({ params }: P) {
   if (!tour) notFound();
   const similar = all.filter((x) => x.slug !== slug).slice(0, 4);
   const t = await getTranslations({ locale: locale as Locale, namespace: 'tourPage' });
+  const ts = await getTranslations({ locale: locale as Locale, namespace: 'home.seasonal' });
   const ld = {
     '@context': 'https://schema.org', '@type': 'TouristTrip', name: tour.title, description: tour.description, touristType: tour.type,
     offers: { '@type': 'Offer', priceCurrency: 'USD', price: tour.price_from, availability: tour.seats_left === 0 ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock' },
@@ -44,19 +45,19 @@ export default async function TourPage({ params }: P) {
       <div className="mx-auto w-full max-w-[1440px] px-4 pt-0 pb-28 md:px-20 md:pt-8 md:pb-24">
         <div className="relative flex flex-col">
           <div className="order-2 mt-4 md:order-1 md:mt-0"><TourHeader tour={tour} /></div>
-          <div className="order-1 md:order-2 md:mt-6"><Gallery tour={tour} /></div>
+          <div className="order-1 md:order-2 md:mt-8"><Gallery tour={tour} /></div>
         </div>
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_440px]">
-          <div className="flex min-w-0 flex-col gap-6">
+        <div className="mt-4 grid gap-8 md:mt-8 lg:grid-cols-[1fr_440px] lg:gap-10">
+          <div className="flex min-w-0 flex-col gap-4 md:gap-6">
             <SectionNav count={tour.reviews_summary.count} />
             <Overview tour={tour} /><Itinerary days={tour.days} /><Included tour={tour} />
-            <Departures tour={tour} /><RouteMap stops={tour.stops} /><ReviewsBlock tour={tour} />
+            <Departures tour={tour} cancel={{ days: settings.cancellation_deadline_days }} /><RouteMap stops={tour.stops} /><ReviewsBlock tour={tour} />
           </div>
           <aside id="booking" className="scroll-mt-24 lg:sticky lg:top-24 lg:self-start"><BookingCard settings={settings} /></aside>
         </div>
         <section aria-labelledby="similar" className="mt-16 md:mt-24">
-          <h2 id="similar" className="mb-6 text-h3 text-dark-900 md:text-h2">{t('similar')}</h2>
-          <Carousel prevLabel="‹" nextLabel="›">{similar.map((x) => <TourCardView key={x.slug} tour={x} />)}</Carousel>
+          <Carousel prevLabel={ts('prev')} nextLabel={ts('next')} label={t('similar')} arrows={false} headClassName="mb-4 md:mb-6"
+            head={<h2 id="similar" className="text-h3 text-dark-900 md:text-h2">{t('similar')}</h2>}>{similar.map((x) => <TourCardView key={x.slug} tour={x} />)}</Carousel>
         </section>
       </div>
       <MobileBookingBar settings={settings} />

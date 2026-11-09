@@ -79,15 +79,17 @@ export function Switch({ label, className, id, ...rest }: ComponentProps<typeof 
 export interface SegmentedOption { value: string; label: ReactNode }
 
 /** Segmented control: «Полностью / Рассрочка». */
-export function SegmentedControl({ options, value, onValueChange, label, className }: {
+export function SegmentedControl({ options, value, onValueChange, label, className, allowEmpty = false }: {
   options: SegmentedOption[]; value: string; onValueChange: (v: string) => void; label: string; className?: string;
+  /** Повторное нажатие на активный вариант снимает выбор (onValueChange('')). */
+  allowEmpty?: boolean;
 }) {
   return (
     <ToggleGroupPrimitive.Root
       type="single"
       value={value}
       aria-label={label}
-      onValueChange={(v) => v && onValueChange(v)}
+      onValueChange={(v) => (v || allowEmpty) && onValueChange(v)}
       className={cn('inline-flex gap-1 rounded-full bg-dark-100 p-1', className)}
     >
       {options.map((o) => (

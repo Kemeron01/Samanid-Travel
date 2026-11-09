@@ -1,5 +1,5 @@
 'use client';
-import { Button, EmptyState, OrderCard, SegmentedControl, SkeletonTourCard } from '@samanid/ui';
+import { Button, EmptyState, OrderCard, SkeletonTourCard, cn } from '@samanid/ui';
 import { api, ageOn, type MeListItem, type OrderTab } from '@samanid/api';
 import { type Locale } from '@samanid/i18n';
 import { useQuery } from '@tanstack/react-query';
@@ -35,7 +35,7 @@ function Item({ it }: { it: MeListItem }) {
   const left = useCountdown(o?.hold_expires_at ?? new Date(0).toISOString());
   if (it.kind === 'request') {
     const r = it.request;
-    return <OrderCard status="awaiting_manager_confirmation" statusLabel={treq('badge')} number={t('request', { number: r.number })} title={r.tour_title.split(':')[0]!} dates={`${dateRange(r.from, r.to, locale)} ${r.to.slice(0, 4)}`} travellers={t('travellers', { adults: r.adults, children: 0 })} totalLabel={t('total')} total="—" action={{ label: t('details'), variant: 'outline', onClick: () => router.push(`/requests/${r.id}` as never) }} />;
+    return <OrderCard status="awaiting_manager_confirmation" statusLabel={treq('badge')} number={t('request', { number: r.number })} title={r.tour_title.split(':')[0]!} dates={`${dateRange(r.from, r.to, locale)} ${r.to.slice(0, 4)}`} travellers={t('travellers', { adults: r.adults, children: 0 })} metaShort={t('metaShort', { dates: dateRange(r.from, r.to, locale), count: r.adults })} totalLabel={t('total')} total="—" action={{ label: t('details'), variant: 'outline', onClick: () => router.push(`/requests/${r.id}` as never) }} />;
   }
   const order = o!;
   const kids = order.travellers.filter((x) => x.kind === 'child' || (x.birth_date && ageOn(x.birth_date, order.departure.from) < 12)).length;
@@ -45,7 +45,7 @@ function Item({ it }: { it: MeListItem }) {
     : order.status === 'completed' && !order.review_left ? { label: t('review'), variant: 'outline' as const, onClick: () => router.push('/account/reviews' as never) }
     : { label: t('details'), variant: 'outline' as const, onClick: () => router.push(`/account/orders/${order.id}` as never) };
   return (
-    <OrderCard image={{ tone: order.tour.image.tone }} status={order.status} statusLabel={ts(order.status)} number={t('booking', { number: order.number })} title={order.tour.title.split(':')[0]!}
+    <OrderCard image={{ tone: order.tour.image.tone }} status={order.status} statusLabel={ts(order.status)} number={t('booking', { number: order.number })} title={order.tour.title.split(':')[0]!} metaShort={t('metaShort', { dates: dateRange(order.departure.from, order.departure.to, locale), count: order.adults + order.children })}
       dates={`${dateRange(order.departure.from, order.departure.to, locale)} ${order.departure.to.slice(0, 4)}`} travellers={t('travellers', { adults: order.adults, children: kids ? order.children : order.children })} seats={order.seats.length ? t('seats', { seats: order.seats.join(', ') }) : undefined}
       hold={pending ? { remainingSeconds: left, labels } : undefined} totalLabel={t('total')} total={money(order.snapshot.total, locale)} action={action} />
   );
@@ -61,10 +61,16 @@ export function OrdersPage() {
       <PageTitle title={t('title')} />
       <OfferBanner />
       <div className="-mx-4 mb-6 overflow-x-auto px-4 md:mx-0 md:px-0">
-        <SegmentedControl label={t('title')} value={tab} onValueChange={(v) => setTab(v as OrderTab)} options={tabs.map((k) => ({ value: k, label: `${t(`tabs.${k}`)}${counts ? ` · ${counts[k]}` : ''}` }))} />
+        {/* Figma 35:888: белая «пилюля» с рамкой, активная вкладка — тёмная, счётчики в кружках. */}
+        <div role="tablist" aria-label={t('title')} className="inline-flex gap-1 rounded-full border border-dark-200 bg-white p-1">
+          {tabs.map((k) => { const on = k === tab; return (
+            <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setTab(k)} className={cn('inline-flex items-center gap-2 rounded-full px-[18px] py-2.5 text-button-m whitespace-nowrap focus-visible:focus-ring', on ? 'bg-dark-900 text-white' : 'text-dark-700 hover:bg-dark-100')}>
+              {t(`tabs.${k}`)}{counts && <span className={cn('rounded-full px-[7px] py-px text-caption', on ? 'bg-dark-700 text-white' : 'bg-dark-100 text-dark-700')}>{counts[k]}</span>}
+            </button>); })}
+        </div>
       </div>
       {isLoading ? <SkeletonTourCard /> : data && data.items.length > 0 ? (
-        <ul className="flex flex-col gap-4">{data.items.map((it) => <li key={it.kind === 'order' ? it.order.id : it.request.id}><Item it={it} /></li>)}</ul>
+        <ul className="flex flex-col gap-4 md:gap-6">{data.items.map((it) => <li key={it.kind === 'order' ? it.order.id : it.request.id}><Item it={it} /></li>)}</ul>
       ) : <EmptyState title={t('empty')} text={t('emptyText')} actionLabel={t('find')} onAction={() => router.push('/tours' as never)} />}
       {tab === 'upcoming' && s && <p className="mt-6 flex items-center gap-2 text-caption text-dark-500"><Info className="size-4" aria-hidden="true" />{t('holdNote', { minutes: s.hold_minutes })}</p>}
     </>

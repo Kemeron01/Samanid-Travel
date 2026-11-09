@@ -1,7 +1,7 @@
 'use client';
 import { Alert, Button, Chip, EmptyState, Input, Media, Modal, PaymentScheduleRow, PhoneInput, ReviewCard, SegmentedControl, StatusBadge, Switch, Textarea, ToastView, cn } from '@samanid/ui';
 import { api, type Order } from '@samanid/api';
-import { type Locale } from '@samanid/i18n';
+import { intlLocale, type Locale } from '@samanid/i18n';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, CircleCheck, Clock, Copy, Globe, Gift, Loader2, LockKeyhole, Phone, Send, Shield, Smartphone, Star, TriangleAlert, Users, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { TourCardView } from '@/components/tours/TourCardView';
 import { hms, useCountdown } from '@/components/waitlist/useCountdown';
-import { compact, dateRange, dayMonth, money, money2 } from '@/lib/format';
+import { compact, dateRange, dayMonth, money, money2, monthYear } from '@/lib/format';
 import { useSession } from '@/lib/session';
 import { PageTitle } from './AccountShell';
 
@@ -87,7 +87,7 @@ export function BonusesPage() {
       <section className={`${card} mt-6`}><h2 className="text-h5 text-dark-900">{t('friends', { count: b.friends.length })}</h2>
         <ul className="mt-4 flex flex-col gap-2">{b.friends.map((f) => <li key={f.name} className="flex items-center gap-3 rounded-lg bg-bg-page px-4 py-3"><span aria-hidden="true">{fIcon[f.status]}</span><div className="flex-1"><p className="text-body-s-medium text-dark-900">{f.name}</p><p className="text-caption text-dark-500">{t(`fs.${f.status}`)}</p></div><span className={cn('text-body-s-medium', f.points ? 'text-success-700' : 'text-dark-400')}>{f.points ? `+${f.points}` : '—'}</span></li>)}</ul></section>
       <section className={`${card} mt-6`}><h2 className="text-h5 text-dark-900">{t('history')}</h2>
-        <table className="mt-4 w-full text-body-s"><tbody>{b.history.map((h, i) => <tr key={i} className="border-b border-dark-100 last:border-0"><td className="py-3 pr-4 text-caption whitespace-nowrap text-dark-500">{dateY(h.date, locale)}</td><td className="py-3 text-dark-900">{t(`hk.${h.kind}`, { ref: h.ref })}</td><td className={cn('py-3 text-right font-semibold whitespace-nowrap', h.points < 0 ? 'text-error-600' : 'text-success-700')}>{h.points > 0 ? '+' : '−'}{compact(Math.abs(h.points), locale)}</td></tr>)}</tbody></table></section>
+        <table className="mt-4 w-full text-body-s"><tbody>{b.history.map((h, i) => <tr key={i} className="border-b border-dark-100 last:border-0"><td className="w-[88px] py-[15px] pr-4 text-caption whitespace-nowrap text-dark-500">{new Intl.DateTimeFormat(intlLocale[locale], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${h.date}T00:00:00Z`)).replace(/\.| г$/g, '')}</td><td className="py-[15px] text-dark-900">{t(`hk.${h.kind}`, { ref: h.ref })}</td><td className={cn('py-[15px] text-right font-semibold whitespace-nowrap', h.points < 0 ? 'text-error-600' : 'text-success-700')}>{h.points > 0 ? '+' : '−'}{compact(Math.abs(h.points), locale)}</td></tr>)}</tbody></table></section>
     </>
   );
 }
@@ -136,7 +136,7 @@ function ReviewForm({ o }: { o: Order }) {
 export function ReviewsPage() {
   const t = useTranslations('account.rev'); const locale = useLocale() as Locale; const { user } = useSession();
   const { data } = useQuery({ queryKey: ['me', 'reviews'], queryFn: () => api.me.reviews() });
-  const month = (d: string) => { const s = new Intl.DateTimeFormat(locale === 'uz' ? 'uz-UZ' : locale === 'en' ? 'en-US' : 'ru-RU', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`)); return s.charAt(0).toUpperCase() + s.slice(1); };
+  const month = (d: string) => monthYear(d, locale);
   return (<><PageTitle title={t('title')} lead={t('lead')} />
     <div className="flex flex-col gap-4">{data?.pending.length ? data.pending.map((o) => <ReviewForm key={o.id} o={o} />) : <p className="text-body-s text-dark-500">{t('none')}</p>}</div>
     {!!data?.written.length && <><h2 className="mt-8 mb-4 text-h5 text-dark-900">{t('published')}</h2><ul className="flex flex-col gap-4">{data.written.map((w, i) => <li key={i}><ReviewCard initials={`${user?.first_name[0] ?? ''}${user?.last_name[0] ?? ''}`} name={`${user?.first_name ?? ''} ${user?.last_name[0] ?? ''}.`} meta={`${month(w.date)} · ${w.tour_title}`} rating={w.rating} text={w.text} verifiedLabel={t('verified')} /></li>)}</ul></>}</>);
@@ -169,7 +169,7 @@ export function NotificationsPage() {
     {st && <section className={`${card} mt-6`}>
       <div className="flex items-center justify-between"><h2 className="text-h6 text-dark-900">{t('what')}</h2><span role="status" className="text-caption text-success-700">{saved ? t('saved') : ''}</span></div>
       <table className="mt-2 w-full"><thead><tr><th className="sr-only">{t('what')}</th><th className="w-20 pb-2 text-center text-caption font-normal text-dark-500">{t('ch.email')}</th><th className="w-20 pb-2 text-center text-caption font-normal text-dark-500">{t('ch.telegram')}</th></tr></thead>
-        <tbody>{evs.map((e) => { const v = st.events[e]; return (<tr key={e} className="border-t border-dark-100"><th scope="row" className="py-3 text-left font-normal"><p className="flex items-center gap-1.5 text-body-m text-dark-900">{t(`ev.${e}`)}{v.locked && <LockKeyhole className="size-4 text-dark-400" aria-hidden="true" />}</p><p className="text-caption text-dark-500">{t(`ev.${e}H`)}</p></th>
+        <tbody>{evs.map((e) => { const v = st.events[e]; return (<tr key={e} className="border-t border-dark-100"><th scope="row" className="py-4 text-left font-normal"><p className="flex items-center gap-1.5 text-body-m text-dark-900">{t(`ev.${e}`)}{v.locked && <LockKeyhole className="size-4 text-dark-400" aria-hidden="true" />}</p><p className="text-caption text-dark-500">{t(`ev.${e}H`)}</p></th>
           {(['email', 'telegram'] as const).map((ch) => <td key={ch} className="text-center"><div className="inline-flex"><Switch label={<span className="sr-only">{`${t(`ev.${e}`)} · ${t(`ch.${ch}`)}`}</span>} checked={v[ch]} disabled={v.locked} onCheckedChange={(c) => update({ ...st, events: { ...st.events, [e]: { ...v, [ch]: c } } })} className="min-h-0 py-0" /></div></td>)}</tr>); })}</tbody></table>
       <p className="mt-3 flex items-center gap-2 text-caption text-dark-500"><LockKeyhole className="size-4" aria-hidden="true" />{t('locked')}</p></section>}
     {st && <section className={`${card} mt-6`}><h2 className="mb-3 text-h6 text-dark-900">{t('lang')}</h2><SegmentedControl label={t('lang')} value={st.language} onValueChange={(v) => update({ ...st, language: v as NotifState['language'] })} options={[{ value: 'ru', label: 'Русский' }, { value: 'uz', label: 'Oʻzbekcha' }, { value: 'en', label: 'English' }]} /></section>}
@@ -178,20 +178,20 @@ export function NotificationsPage() {
 
 /* 3.14 Профиль и безопасность */
 export function ProfilePage() {
-  const t = useTranslations('account.profile'); const tt = useTranslations('checkout.travellers'); const { user, setUser, logout } = useSession(); const router = useRouter(); const qc = useQueryClient();
+  const t = useTranslations('account.profile'); const tt = useTranslations('checkout.travellers'); const locale = useLocale() as Locale; const { user, setUser, logout } = useSession(); const router = useRouter(); const qc = useQueryClient();
   const [form, setForm] = useState({ first_name: user?.first_name ?? '', last_name: user?.last_name ?? '', phone: user?.phone ?? '' });
   const [saved, setSaved] = useState(false); const [del, setDel] = useState(false); const [tfa, setTfa] = useState(false);
   const { data: sessions } = useQuery({ queryKey: ['me', 'sessions'], queryFn: () => api.me.sessions() });
   const save = async () => { setUser(await api.auth.updateUser(form)); setSaved(true); setTimeout(() => setSaved(false), 2000); };
   const revoke = async (id: string) => { await api.me.revokeSession(id); await qc.invalidateQueries({ queryKey: ['me', 'sessions'] }); };
   const exportData = async () => { const b = await api.me.exportData(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'samanid-my-data.json'; a.click(); URL.revokeObjectURL(a.href); };
-  const row = (I: typeof Shield, title: string, hint: string, action: React.ReactNode) => <li className="flex flex-wrap items-center gap-4 border-b border-dark-100 py-4 last:border-0"><I className="size-5 text-dark-600" aria-hidden="true" /><div className="flex-1"><p className="text-body-m text-dark-900">{title}</p><p className="text-caption text-dark-500">{hint}</p></div>{action}</li>;
+  const row = (I: typeof Shield, title: string, hint: string, action: React.ReactNode) => <li className="flex flex-wrap items-center gap-4 border-b border-dark-100 py-5 last:border-0"><I className="size-5 text-dark-600" aria-hidden="true" /><div className="flex-1"><p className="text-body-m text-dark-900">{title}</p><p className="text-caption text-dark-500">{hint}</p></div>{action}</li>;
   const outline = 'border-primary-500 text-primary-500';
   if (!user) return null;
   return (<><PageTitle title={t('title')} />
     <section className={`${card} flex flex-col gap-4`}><h2 className="text-h6 text-dark-900">{t('personal')}</h2>
       <div className="grid gap-4 md:grid-cols-2"><Input label={t('first')} autoComplete="given-name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /><Input label={t('last')} autoComplete="family-name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-        <Input label="Email" value={user.email} readOnly disabled /><PhoneInput label={tt('phone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+        <Input label="Email" value={user.email} readOnly /><PhoneInput label={tt('phone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
       <div className="flex items-center justify-end gap-3"><span role="status" className="text-caption text-success-700">{saved ? t('saved') : ''}</span><Button variant="secondary" onClick={save}>{t('save')}</Button></div></section>
     <section className={`${card} mt-6`}><h2 className="text-h6 text-dark-900">{t('security')}</h2><ul className="mt-2">
       {row(LockKeyhole, t('pwd'), t('pwdH'), <Button variant="outline" className={outline} onClick={() => router.push('/reset-password' as never)}>{t('pwdBtn')}</Button>)}
@@ -199,7 +199,7 @@ export function ProfilePage() {
       {row(Globe, t('google'), t('googleH', { email: user.email }), <Button variant="outline" className={outline}>{t('disconnect')}</Button>)}</ul></section>
     <section className={`${card} mt-6`}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-h6 text-dark-900">{t('sessions')}</h2>{(sessions?.length ?? 0) > 1 && <button type="button" onClick={() => revoke('others')} className="text-body-s-medium text-error-600 focus-visible:focus-ring">{t('endOthers')}</button>}</div>
       <ul className="mt-4 flex flex-col gap-3">{sessions?.map((s) => <li key={s.id} className={cn('flex items-center gap-4 rounded-lg p-4', s.current ? 'bg-primary-50' : 'bg-bg-page')}>{s.device.includes('macOS') ? <Smartphone className="size-5 text-dark-600" aria-hidden="true" /> : <Phone className="size-5 text-dark-600" aria-hidden="true" />}
-        <div className="flex-1"><p className="flex flex-wrap items-center gap-2 text-body-m text-dark-900">{s.device}{s.current && <span className="rounded-full bg-primary-500 px-2 py-0.5 text-caption text-white">{t('thisSession')}</span>}</p><p className="text-caption text-dark-500">{s.place} · {s.current ? t('now') : s.last}</p></div>
+        <div className="flex-1"><p className="flex flex-wrap items-center gap-2 text-body-m text-dark-900">{s.device}{s.current && <span className="rounded-full bg-primary-500 px-2 py-0.5 text-caption text-white">{t('thisSession')}</span>}</p><p className="text-caption text-dark-500">{s.place} · {s.current ? t('now') : dateY(s.last, locale)}</p></div>
         {!s.current && <button type="button" onClick={() => revoke(s.id)} className="text-body-s-medium text-error-600 focus-visible:focus-ring">{t('end')}</button>}</li>)}</ul></section>
     <section className={`${card} mt-6 flex flex-col gap-3`}><h2 className="text-h6 text-dark-900">{t('data')}</h2><p className="text-body-s text-dark-600">{t('dataText')}</p>
       <div className="flex flex-wrap items-center gap-4"><Button variant="outline" className={outline} onClick={exportData}>{t('export')}</Button><button type="button" onClick={() => setDel(true)} className="text-body-s-medium text-error-600 focus-visible:focus-ring">{t('delete')}</button></div></section>

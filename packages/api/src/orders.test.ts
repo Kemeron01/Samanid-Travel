@@ -64,3 +64,16 @@ describe('hold and payments', () => {
     expect(e!.status).toBe('expired'); expect(e!.released_seats).toEqual(['2A']);
   });
 });
+
+describe('waitlist offer', () => {
+  beforeEach(() => localStorage.clear());
+  it('a sold-out departure can be booked only with a waitlist offer', async () => {
+    const { tours, buildDetail } = await import('./fixtures');
+    const t = tours.find((x) => x.slug === 'samarkand-bukhara-5d')!;
+    const sold = buildDetail(t).departures.find((d) => d.seats_left === 0);
+    if (!sold) return; // фикстура без распроданной даты — проверять нечего
+    await expect(ordersApi.create({ tour: t.slug, departure: sold.id, adults: 2, children: 0 })).rejects.toThrow('sold_out');
+    const o = await ordersApi.create({ tour: t.slug, departure: sold.id, adults: 2, children: 0, waitlist_offer_id: 'wo_1' });
+    expect(o.status).toBe('draft');
+  });
+});

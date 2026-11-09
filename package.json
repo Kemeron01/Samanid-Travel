@@ -2,7 +2,9 @@
   "name": "samanid-travel-frontend",
   "private": true,
   "packageManager": "pnpm@10.18.3",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -10,9 +12,13 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "storybook": "pnpm --filter @samanid/ui storybook",
-    "format": "prettier --write \"{apps,packages}/**/*.{ts,tsx,css,json,md}\""
+    "format": "prettier --write \"{apps,packages}/**/*.{ts,tsx,css,json,md}\"",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report e2e-report"
   },
   "devDependencies": {
+    "@playwright/test": "1.48.2",
     "prettier": "^3.3.3",
     "turbo": "^2.1.3",
     "typescript": "^5.6.3"

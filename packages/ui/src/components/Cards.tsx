@@ -76,7 +76,7 @@ export function TourCard(p: TourCardProps) {
   const tags = (p.tags ?? []).slice(0, 2);
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-xl border border-dark-200 bg-white transition-shadow hover:border-primary-100 hover:shadow-md focus-within:focus-ring">
-      <div className="relative aspect-[300/210]">
+      <div className="relative h-[210px] shrink-0">
         <Media {...p.image} ImageComponent={p.ImageComponent} className="absolute inset-0" />
         <div className="absolute top-3 left-3 flex gap-1.5">
           {p.soldOut ? <span className="rounded-sm bg-dark-900 px-2.5 py-1.5 text-caption text-white">{p.soldOut.label}</span>
@@ -123,17 +123,18 @@ export function TourCard(p: TourCardProps) {
   );
 }
 
-export function DestinationCard({ href, name, meta, image, Link = DefaultLink, ImageComponent }: {
-  href: string; name: string; meta: string; image?: { src?: string; alt?: string; caption?: string; tone?: ImageTone };
+export function DestinationCard({ href, name, meta, metaShort, image, Link = DefaultLink, ImageComponent }: {
+  href: string; name: string; meta: string; metaShort?: string; image?: { src?: string; alt?: string; caption?: string; tone?: ImageTone };
   Link?: LinkComponent; ImageComponent?: ImageComponent;
 }) {
+  // Figma 16:584 (305×400) / 18:1020 (173×200): подпись снизу-слева 20/26px; на mobile — без цены и без подписи плейсхолдера.
   return (
-    <article className="relative aspect-[280/360] w-full overflow-hidden rounded-2xl focus-within:focus-ring">
-      <Media tone="mountain" {...image} ImageComponent={ImageComponent} className="absolute inset-0" />
+    <article className="relative aspect-[173/200] w-full overflow-hidden rounded-2xl focus-within:focus-ring md:aspect-[305/400]">
+      <Media tone="mountain" {...image} ImageComponent={ImageComponent} className="absolute inset-0 max-md:[&_span]:hidden" />
       <div aria-hidden="true" className="absolute inset-0 bg-linear-to-b from-40% from-dark-900/0 to-dark-900/85" />
-      <div className="absolute bottom-6 left-5 flex flex-col gap-1">
+      <div className="absolute right-5 bottom-[26px] left-5 flex flex-col gap-1">
         <h3 className="text-h4 text-white"><Link href={href} className="outline-none after:absolute after:inset-0 after:content-['']">{name}</Link></h3>
-        <p className="flex items-center gap-1.5 text-body-s text-dark-200">{meta}<ArrowRight className="size-4" aria-hidden="true" /></p>
+        <p className="flex items-center gap-1.5 text-body-s text-dark-200">{metaShort ? <><span className="md:hidden">{metaShort}</span><span className="hidden md:inline">{meta}</span></> : meta}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></p>
       </div>
     </article>
   );
@@ -181,20 +182,31 @@ export function OrderCard(p: {
   title: string; dates: string; travellers: string; seats?: string;
   hold?: { remainingSeconds: number; labels: Record<HoldTimerState, string> };
   totalLabel: string; total: string; action: { label: string; variant: 'primary' | 'outline'; onClick: () => void };
+  /** Mobile (39:2278): короткая мета «12–16 мая · 3 чел.» */
+  metaShort?: string;
 }) {
   const meta = [{ i: Calendar, t: p.dates }, { i: Users, t: p.travellers }, ...(p.seats ? [{ i: Bus, t: p.seats }] : [])];
   return (
     <article className="flex flex-col gap-4 rounded-xl border border-dark-200 bg-white p-4 md:flex-row md:items-center md:gap-5">
-      <Media {...p.image} className="relative h-30 w-full shrink-0 rounded-[14px] md:w-35" />
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      {/* Mobile: компактная карточка — миниатюра 64px, статус и название рядом, мета одной строкой, цена + кнопка. */}
+      <div className="flex flex-col gap-3 md:hidden">
+        <div className="flex items-start gap-3"><Media {...p.image} className="relative size-16 shrink-0 rounded-md [&_span]:hidden [&_svg]:size-7" />
+          <div className="flex min-w-0 flex-col items-start gap-2"><StatusBadge status={p.status} label={p.statusLabel} title={p.statusTitle} /><h3 className="text-body-m-medium text-dark-900">{p.title}</h3></div></div>
+        <p className="text-caption text-dark-500">{p.metaShort ?? p.dates}</p>
+        {p.hold && <HoldTimer remainingSeconds={p.hold.remainingSeconds} labels={p.hold.labels} className="self-start" />}
+        <div className="flex items-center justify-between gap-3"><span className="text-price-m text-dark-900"><span className="sr-only">{p.totalLabel}: </span>{p.total}</span>
+          <Button variant={p.action.variant === 'primary' ? 'primary' : 'outline'} onClick={p.action.onClick}>{p.action.label}</Button></div>
+      </div>
+      <Media {...p.image} className="relative h-30 w-full shrink-0 rounded-[14px] max-md:hidden md:w-35" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2 max-md:hidden">
         <div className="flex flex-wrap items-center gap-3"><StatusBadge status={p.status} label={p.statusLabel} title={p.statusTitle} /><span className="text-caption text-dark-500">{p.number}</span></div>
         <h3 className="text-h5 text-dark-900">{p.title}</h3>
         <ul className="flex flex-wrap gap-x-5 gap-y-1 text-body-s text-dark-600">{meta.map(({ i: I, t }) => <li key={t} className="flex items-center gap-1.5"><I className="size-4" aria-hidden="true" />{t}</li>)}</ul>
         {p.hold && <HoldTimer remainingSeconds={p.hold.remainingSeconds} labels={p.hold.labels} className="self-start" />}
       </div>
-      <div className="flex items-center justify-between gap-3 md:flex-col md:items-end">
+      <div className="flex items-center justify-between gap-3 max-md:hidden md:flex-col md:items-end">
         <div className="flex flex-col md:items-end"><span className="text-caption text-dark-500">{p.totalLabel}</span><span className="text-price-m text-dark-900">{p.total}</span></div>
-        <Button variant={p.action.variant === 'primary' ? 'primary' : 'outline'} onClick={p.action.onClick} className={p.action.variant === 'outline' ? 'border-primary-500 text-primary-500' : undefined}>{p.action.label}</Button>
+        <Button variant={p.action.variant === 'primary' ? 'primary' : 'outline'} onClick={p.action.onClick}>{p.action.label}</Button>
       </div>
     </article>
   );

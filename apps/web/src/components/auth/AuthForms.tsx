@@ -16,7 +16,8 @@ function PasswordInput(props: React.ComponentProps<typeof Input>) {
   const [show, setShow] = useState(false);
   return <Input {...props} type={show ? 'text' : 'password'} trailing={<button type="button" aria-label={show ? 'Hide password' : 'Show password'} aria-pressed={show} onClick={() => setShow(!show)} className="inline-flex size-8 items-center justify-center rounded-full text-dark-500 focus-visible:focus-ring">{show ? <EyeOff className="size-5" aria-hidden="true" /> : <Eye className="size-5" aria-hidden="true" />}</button>} />;
 }
-const safeNext = (n?: string) => (n && n.startsWith('/') && !n.startsWith('//') ? n : '/account');
+/** Только внутренний путь (без //host); префикс локали снимаем — роутер next-intl добавит текущую локаль сам. */
+const safeNext = (n?: string) => (n && n.startsWith('/') && !n.startsWith('//') ? n.replace(/^\/(ru|uz|en)(?=\/|$)/, '') || '/' : '/account');
 
 export function LoginForm({ next }: { next?: string }) {
   const t = useTranslations('auth'); const router = useRouter(); const { setSession } = useSession();
@@ -31,14 +32,14 @@ export function LoginForm({ next }: { next?: string }) {
   const google = async () => { setG(true); setSession(await api.auth.google()); router.replace(safeNext(next) as never); };
   return (
     <AuthShell>
-      <div><h1 className="text-h2 text-dark-900">{t('login.title')}</h1><p className="mt-2 text-body-m text-dark-500">{t('login.lead')}</p></div>
+      <div><h1 className="text-h2 text-dark-900">{t('login.title')}</h1><p className="mt-2 text-body-m text-dark-500 max-md:hidden">{t('login.lead')}</p></div>
       <GoogleButton label={t('google')} onClick={google} loading={g} />
       <Divider label={t('or')} />
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <Input type="email" autoComplete="email" label={t('email')} error={errors.email?.message} {...register('email')} />
         <PasswordInput autoComplete="current-password" label={t('password')} error={errors.password?.message ?? err} {...register('password')} />
         <div className="flex items-center justify-between gap-3">
-          <Controller control={control} name="remember" render={({ field }) => <Checkbox label={t('login.remember')} checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />} />
+          <Controller control={control} name="remember" render={({ field }) => <Checkbox className="max-md:hidden" label={t('login.remember')} checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} />} />
           <Link href="/forgot-password" className="text-body-s-medium text-primary-500 focus-visible:focus-ring">{t('login.forgot')}</Link>
         </div>
         <Button type="submit" variant="secondary" size="L" loading={isSubmitting} className="w-full">{t('login.submit')}</Button>
@@ -67,7 +68,7 @@ export function RegisterForm() {
   });
   return (
     <AuthShell>
-      <div><h1 className="text-h2 text-dark-900">{t('register.title')}</h1><p className="mt-2 text-body-m text-dark-500">{t('register.lead')}</p></div>
+      <div><h1 className="text-h2 text-dark-900">{t('register.title')}</h1><p className="mt-2 text-body-m text-dark-500 max-md:hidden">{t('register.lead')}</p></div>
       <GoogleButton label={t('google')} onClick={async () => { setSession(await api.auth.google()); router.replace('/account' as never); }} />
       <Divider label={t('or')} />
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">

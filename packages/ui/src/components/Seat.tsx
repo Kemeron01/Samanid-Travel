@@ -81,7 +81,7 @@ export function SeatMap({ rows, stateLabels, onSelect, entranceLabel, driverLabe
   );
 }
 
-function MiniSeat({ state, code }: { state: SeatState; code?: string }) {
+export function MiniSeat({ state, code }: { state: SeatState; code?: string }) {
   const t = tone[state];
   return (
     <span aria-hidden="true" className={cn('relative inline-block h-[33.6px] w-[30.8px] shrink-0', state === 'unavailable' && 'opacity-60')}>

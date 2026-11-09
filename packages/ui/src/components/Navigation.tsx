@@ -153,8 +153,9 @@ export function Pagination({ page, pageCount, onChange, labels }: {
 }
 
 /** Stepper шагов бронирования: desktop — 5 шагов, mobile — «Шаг N из 5» + полоса прогресса. */
-export function Stepper({ steps, current, stepOfLabel, label }: {
-  steps: string[]; current: number /* 1-based */; stepOfLabel: string; label: string;
+/** compact — Figma 32:2300 (изменение заказа): кружки 28px, коннекторы 40×2, без растягивания на всю ширину. */
+export function Stepper({ steps, current, stepOfLabel, label, compact }: {
+  steps: string[]; current: number /* 1-based */; stepOfLabel: string; label: string; compact?: boolean;
 }) {
   const total = steps.length;
   return (
@@ -173,15 +174,15 @@ export function Stepper({ steps, current, stepOfLabel, label }: {
           const n = i + 1;
           const done = n < current, cur = n === current;
           return (
-            <li key={s} className={cn('flex items-center gap-3', i < total - 1 && 'flex-1')} aria-current={cur ? 'step' : undefined}>
+            <li key={s} className={cn('flex items-center gap-3', i < total - 1 && !compact && 'flex-1')} aria-current={cur ? 'step' : undefined}>
               <span className="flex items-center gap-2.5">
-                <span aria-hidden="true" className={cn('flex size-8 items-center justify-center rounded-full text-body-s-medium',
-                  done && 'bg-primary-500 text-white', cur && 'border-4 border-primary-100 bg-primary-500 text-white', !done && !cur && 'border-[1.5px] border-dark-300 bg-white text-dark-500')}>
+                <span aria-hidden="true" className={cn('flex size-8 items-center justify-center rounded-full text-body-s-medium', compact && 'size-7 text-caption',
+                  done && 'bg-primary-500 text-white', cur && (compact ? 'bg-primary-500 text-white' : 'border-4 border-primary-100 bg-primary-500 text-white'), !done && !cur && 'border-[1.5px] border-dark-300 bg-white text-dark-500')}>
                   {done ? <Check className="size-4" /> : n}
                 </span>
                 <span className={cn('text-body-s whitespace-nowrap', cur ? 'font-semibold text-dark-900' : done ? 'text-dark-900' : 'text-dark-500')}>{s}</span>
               </span>
-              {i < total - 1 && <span aria-hidden="true" className={cn('h-0.5 min-w-4 flex-1 rounded-[1px]', done ? 'bg-primary-500' : 'bg-dark-200')} />}
+              {i < total - 1 && <span aria-hidden="true" className={cn('h-0.5 min-w-4 rounded-[1px]', compact ? 'w-10' : 'flex-1', done ? 'bg-primary-500' : 'bg-dark-200')} />}
             </li>
           );
         })}
@@ -206,7 +207,7 @@ export function Footer({ description, columns, contacts, social, copyright, paym
     <footer className="bg-dark-900">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-10 md:px-20 md:py-16">
         <div className="flex flex-col gap-8 lg:flex-row lg:justify-between">
-          <div className="flex max-w-[340px] flex-col gap-5">
+          <div className="flex flex-col gap-5 lg:max-w-[340px]">
             <Logo onDark />
             <p className="text-body-s text-dark-400">{description}</p>
             <div className="flex gap-3">
@@ -219,7 +220,7 @@ export function Footer({ description, columns, contacts, social, copyright, paym
             {columns.map((c) => (
               <div key={c.title} className="flex flex-col gap-3.5">
                 <p className="text-h6 text-white">{c.title}</p>
-                <ul className="flex flex-col gap-3.5">{c.links.map((l) => <li key={l.href + l.label}><Link href={l.href} className={linkCls}>{l.label}</Link></li>)}</ul>
+                <ul className="flex flex-col gap-3.5 text-body-s">{c.links.map((l) => <li key={l.href + l.label}><Link href={l.href} className={linkCls}>{l.label}</Link></li>)}</ul>
               </div>
             ))}
             <div className="flex flex-col gap-3.5">

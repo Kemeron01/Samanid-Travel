@@ -14,5 +14,5 @@ export default async function OfferPage({ params }: { params: Promise<{ locale: 
   const { locale, id } = await params; setRequestLocale(locale);
   const offer = await api.waitlistOffer(id);
   if (!offer) notFound();
-  return <PageContainer className="py-8 md:py-16"><OfferView offer={offer} /></PageContainer>;
+  return <PageContainer className="py-6 md:py-12"><OfferView offer={offer} /></PageContainer>;
 }

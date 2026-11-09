@@ -14,10 +14,10 @@ export default async function TransferPage({ params }: { params: Promise<{ local
   const { locale } = await params; setRequestLocale(locale);
   const [options, t] = [await api.transferOptions(), await getTranslations({ locale, namespace: 'transferPage' })];
   return (
-    <PageContainer className="pt-6 pb-28 md:pt-12 md:pb-24">
+    <PageContainer className="pt-5 pb-28 md:pt-8 md:pb-24">
       <h1 className="text-h2 text-dark-900 md:text-h1">{t('title')}</h1>
-      <p className="mt-2 mb-8 max-w-[960px] text-body-m text-dark-600 max-md:hidden md:text-body-l">{t('subtitle')}</p>
-      <div className="mt-6 md:mt-0"><TransferBuilder options={options} /></div>
+      <p className="mt-2 mb-8 max-w-[960px] text-body-l text-dark-500 max-md:hidden">{t('subtitle')}</p>
+      <div className="mt-4 md:mt-0"><TransferBuilder options={options} /></div>
     </PageContainer>
   );
 }

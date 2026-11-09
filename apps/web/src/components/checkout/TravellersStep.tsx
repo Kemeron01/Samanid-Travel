@@ -54,7 +54,7 @@ export function TravellersStep({ order }: { order: Order }) {
 
   const childUnit = order.snapshot.lines.find((l) => l.kind === 'children')?.unit_price;
   return (
-    <CheckoutShell order={order} step="travellers" title={t('title')} lead={t('lead')} showTimer={false}
+    <CheckoutShell order={order} step="travellers" title={t('title')} lead={t('lead')} leadShort={t('leadShort')} showTimer={false}
       nav={{ nextLabel: t('next'), onNext: () => void submit(), loading: isSubmitting || patch.isPending }}>
       <form noValidate onSubmit={submit} className="flex flex-col gap-6">
         {watched.map((tr, i) => {
@@ -63,10 +63,10 @@ export function TravellersStep({ order }: { order: Order }) {
           return (
             <section key={tr.id} aria-labelledby={`tr-${i}`} className={`${card} flex flex-col gap-4`}>
               <div className="flex items-center justify-between gap-3">
-                <h2 id={`tr-${i}`} className="flex items-center gap-3 text-body-m-medium text-dark-900"><span aria-hidden="true" className={`flex size-8 items-center justify-center rounded-full ${child ? 'bg-accent-100 text-accent-600' : 'bg-primary-50 text-primary-500'}`}>{child ? <Baby className="size-[18px]" /> : <User className="size-[18px]" />}</span>{t('card', { n: i + 1, kind: child ? t('child') : t('adult') })}</h2>
+                <h2 id={`tr-${i}`} className="flex items-center gap-3 text-body-m-medium text-dark-900 max-md:text-h6"><span aria-hidden="true" className={`flex size-8 items-center max-md:hidden justify-center rounded-full ${child ? 'bg-accent-100 text-accent-600' : 'bg-primary-50 text-primary-500'}`}>{child ? <Baby className="size-[18px]" /> : <User className="size-[18px]" />}</span><span className="md:hidden">{i + 1} · {child ? t('child') : t('adult')}</span><span className="max-md:hidden">{t('card', { n: i + 1, kind: child ? t('child') : t('adult') })}</span></h2>
                 {i === 0 ? <Checkbox label={t('me')} checked={me} onCheckedChange={(c) => void toggleMe(c === true)} /> : n > 0 ? <p role="alert" className="flex items-center gap-1.5 text-caption text-error-700"><TriangleAlert className="size-4" aria-hidden="true" />{t('fill', { count: n })}</p> : null}
               </div>
-              <Input label={t('fullName')} helper={t('fullNameHint')} autoComplete="off" autoCapitalize="characters" error={e?.full_name?.message} {...register(`travellers.${i}.full_name`, { setValueAs: (v: string) => v.toUpperCase() })} />
+              <Input label={t('fullName')} helper={t('fullNameHint')} className="max-md:[&_[id$=-helper]]:hidden" autoComplete="off" autoCapitalize="characters" error={e?.full_name?.message} {...register(`travellers.${i}.full_name`, { setValueAs: (v: string) => v.toUpperCase() })} />
               <div className="grid gap-4 md:grid-cols-3">
                 <Controller control={control} name={`travellers.${i}.birth_date`} render={({ field }) => <DateTextInput label={t('birth')} placeholder={t('datePh')} value={field.value} onValueChange={field.onChange} error={e?.birth_date?.message} />} />
                 <Controller control={control} name={`travellers.${i}.citizenship`} render={({ field }) => <Select label={t('citizenship')} placeholder={t('citizenshipPh')} value={field.value} onValueChange={field.onChange} error={e?.citizenship?.message} options={COUNTRIES.map((c) => ({ value: c, label: t(`countries.${c}` as never) }))} />} />

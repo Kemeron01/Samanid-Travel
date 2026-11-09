@@ -14,6 +14,16 @@ export const dateRange = (from: string, to: string, l: Locale) => {
   return dayMonth(to, l).replace(String(d2), `${d1}–${d2}`);
 };
 
+/** «Май 2026» / «May 2026» — месяц в именительном падеже и год, без «г.» (Figma: карточки отзывов). */
+export const monthYear = (d: string, l: Locale) => {
+  const date = new Date(`${d.slice(0, 10)}T00:00:00Z`);
+  const m = new Intl.DateTimeFormat(intlLocale[l], { month: 'long', timeZone: 'UTC' }).format(date);
+  return `${m.charAt(0).toUpperCase()}${m.slice(1)} ${date.getUTCFullYear()}`;
+};
+
+/** «12–16 мая 2027» / «May 12–16, 2027» — диапазон с годом окончания (Figma: сводка заказа). */
+export const dateRangeYear = (from: string, to: string, l: Locale) => `${dateRange(from, to, l)}${l === 'ru' ? '' : ','} ${to.slice(0, 4)}`;
+
 /** «12 мая 2027» / «May 12, 2027» / «12-may, 2027». */
 export const dateLong = (d: string, l: Locale) => {
   const y = new Date(d.length === 10 ? `${d}T00:00:00Z` : d).getUTCFullYear();

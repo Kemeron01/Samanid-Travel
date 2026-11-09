@@ -10,8 +10,8 @@ export type FaqCategory = 'payment' | 'cancel' | 'visa' | 'trip';
 export interface FaqItem { id: string; category: FaqCategory; q: string; a: string }
 export type LegalSlug = 'cancellation' | 'privacy' | 'consent';
 export interface LegalSection { id: string; title: string; summary?: string; paragraphs: string[] }
-export interface LegalDoc { slug: LegalSlug; lang: ContentLang; title: string; edition: string; sections: LegalSection[]; /** null → PDF не сгенерирован, фронт предлагает печать в PDF */ pdf_url: string | null }
-export type VoucherStatus = 'confirmed' | 'partially_paid' | 'cancelled' | 'refunded' | 'expired' | 'completed';
+export interface LegalDoc { slug: LegalSlug; lang: ContentLang; title: string; edition: string; /** подпись блока «Коротко» на языке документа */ summary_label: string; sections: LegalSection[]; /** null → PDF не сгенерирован, фронт предлагает печать в PDF */ pdf_url: string | null }
+export type VoucherStatus = 'pending' | 'confirmed' | 'partially_paid' | 'cancelled' | 'refunded' | 'expired' | 'completed';
 /** Публичная проверка: только номер, тур, выезд, кол-во пассажиров, места и статус — без персональных данных. */
 export interface VoucherCheck { valid: boolean; number: string; tour: string; departure: string; meeting_time: string; passengers: number; seats: string[]; status: VoucherStatus; checked_at: string; cancelled_at?: string }
 export interface CompanyInfo { founded: number; travellers: number; tours: number; guides: number; rating: number; group_max: number; telegram: string; phone: string; email: string; geo: { lat: number; lng: number } }
@@ -119,7 +119,7 @@ function legalFor(slug: LegalSlug, l: ContentLang): LegalDoc {
     },
   };
   const d = T[slug][l];
-  return { slug, lang: l, title: d.title, edition: '2027-03-01', sections: sec(d.sections), pdf_url: null };
+  return { slug, lang: l, title: d.title, edition: '2027-03-01', summary_label: { ru: 'Коротко', uz: 'Qisqacha', en: 'In short' }[l], sections: sec(d.sections), pdf_url: null };
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -141,7 +141,7 @@ export const contentApi = {
     const o = Object.values(_store.load()).find((x) => x.number === c);
     if (o) {
       const ok = ['confirmed', 'partially_paid', 'paid'].includes(o.status);
-      const status = (o.status === 'paid' ? 'confirmed' : o.status) as VoucherStatus;
+      const status: VoucherStatus = o.status === 'paid' ? 'confirmed' : ['draft', 'pending_payment', 'awaiting_manager_confirmation'].includes(o.status) ? 'pending' : (o.status as VoucherStatus);
       return { valid: ok, number: o.number, tour: o.tour.title, departure: o.departure.from, meeting_time: o.departure.meeting_time, passengers: o.travellers.length, seats: o.seats, status, checked_at: now };
     }
     // Демо-ваучеры из макета (5.3): действительный и отменённый.

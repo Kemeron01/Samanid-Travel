@@ -36,7 +36,9 @@
     "prev": "Orqaga",
     "next": "Oldinga",
     "prevMonth": "Oldingi oy",
-    "nextMonth": "Keyingi oy"
+    "nextMonth": "Keyingi oy",
+    "decrease": "Kamaytirish",
+    "increase": "Koʻpaytirish"
   },
   "header": {
     "login": "Kirish",
@@ -112,13 +114,18 @@
       "badge": "5 dan {rating} · {count}+ sayohatchi sharhi",
       "title": "Samanid Travel bilan Oʻzbekistonni kashf eting",
       "subtitle": "Buyuk ipak yoʻli boʻylab guruh va individual turlar, transferlar va qoʻshimcha xizmatlar. 5 daqiqada bron qiling, bekor qilinsa toʻliq qaytariladi.",
-      "heroAlt": "Quyosh botishida Registon"
+      "heroAlt": "Quyosh botishida Registon",
+      "subtitleShort": "Ipak yoʻli boʻylab turlar, transferlar va qoʻshimcha xizmatlar. Bekor qilinsa toʻliq qaytariladi."
     },
     "stats": {
       "travellers": "2014-yildan beri sayohatchilar",
       "tours": "{count} yoʻnalish boʻyicha mualliflik turlari",
       "rating": "{count} sharh boʻyicha oʻrtacha baho",
-      "penalty": "bekor qilish jarimasi — toʻliq qaytarish"
+      "penalty": "bekor qilish jarimasi — toʻliq qaytarish",
+      "travellersShort": "sayohatchilar",
+      "toursShort": "mualliflik turlari",
+      "ratingShort": "oʻrtacha baho",
+      "penaltyShort": "bekor qilish jarimasi"
     },
     "seasonal": {
       "title": "Mavsumiy toʻplamlar",
@@ -136,15 +143,19 @@
       "tag": "Bayram turi",
       "daysDeparture": "{days} kun, joʻnash {date}",
       "group": "Guruh {max} kishigacha, rus va ingliz tilida gid",
-      "priceInstallments": "Bir kishi uchun {price} · {count} ta toʻlovga boʻlib",
+      "priceInstallments": "Bir kishi uchun {price} dan · {count} ta toʻlovga boʻlib",
       "view": "Turni koʻrish",
-      "all": "Barcha bayramlar"
+      "all": "Barcha bayramlar",
+      "summary": "{dates} · {max} kishigacha guruh · {price} dan, {count} ta toʻlovga boʻlib"
     },
     "destinations": {
       "title": "Mashhur yoʻnalishlar",
       "subtitle": "{count} mintaqa — qadimiy shaharlardan togʻ va choʻllargacha",
       "all": "Barcha yoʻnalishlar",
-      "meta": "{count} ta tur · {price} dan"
+      "meta": "{count} ta tur · {price} dan",
+      "titleShort": "Yoʻnalishlar",
+      "allShort": "Barchasi",
+      "metaShort": "{count} ta tur"
     },
     "why": {
       "title": "Biz bilan xotirjam",
@@ -157,19 +168,30 @@
       "seatTitle": "Avtobusda oʻz joyingiz",
       "seatText": "Transport sxemasidan joyni samolyotdagidek tanlang. Bitta joy — bitta egasi.",
       "voucherTitle": "Telegramda vaucher",
-      "voucherText": "QR-kodli PDF vaucher, joʻnash va toʻlov eslatmalari — pochta va Telegramda."
+      "voucherText": "QR-kodli PDF vaucher, joʻnash va toʻlov eslatmalari — pochta va Telegramda.",
+      "refundTextShort": "Joʻnashdan {days} kun oldingacha, pul {refund} kunda qaytadi",
+      "refundTextShortNoDeadline": "Pul {refund} kunda qaytadi",
+      "installmentTextShort": "Depozit joyni band qiladi",
+      "seatTextShort": "Sxemada joy tanlash",
+      "voucherTextShort": "QR-kod va eslatmalar"
     },
     "reviews": {
       "title": "Sayohatchilar nima deydi",
       "subtitle": "Sharhlar faqat safar tugagach qoldiriladi",
       "verified": "Tasdiqlangan safar",
       "prev": "Oldingi sharhlar",
-      "next": "Keyingi sharhlar"
+      "next": "Keyingi sharhlar",
+      "titleShort": "Sharhlar",
+      "subtitleShort": "Faqat yakunlangan safardan keyin",
+      "all": "Barchasi"
     },
     "referral": {
       "title": "Doʻstlarni taklif qiling — arzonroq sayohat qiling",
       "text": "Siz va doʻstingiz uning birinchi toʻlangan safaridan keyin {points} ball bonus olasiz ({usd}). Ballar bilan keyingi buyurtmaning {cap}% igacha toʻlash mumkin.",
-      "cta": "Kodni olish"
+      "cta": "Kodni olish",
+      "titleShort": "Doʻstingizni taklif qiling — har biringizga {points} ball",
+      "textShort": "Doʻstingizning birinchi toʻlangan safaridan keyin beriladi.",
+      "ctaShort": "Kodni olish"
     },
     "subscribe": {
       "title": "Oyda bir marta toʻplamlar va chegirmalar",
@@ -245,9 +267,11 @@
     "openFilters": "Filtrlar",
     "filtersCount": "Filtrlar · {count}",
     "empty": {
-      "title": "Hech narsa topilmadi",
+      "title": "Filtrlaringiz boʻyicha turlar yoʻq",
       "text": "Sanalarni oʻzgartiring yoki ayrim filtrlarni olib tashlang",
-      "reset": "Filtrlarni tozalash"
+      "reset": "Filtrlarni tozalash",
+      "textFrom": "Mos turlar {price} dan boshlanadi. Byudjetni oshiring yoki boshqa sanalarni tanlang.",
+      "suggest": "Sizga mos kelishi mumkin"
     },
     "pagination": {
       "nav": "Sahifalar",
@@ -255,7 +279,17 @@
       "next": "Keyingi sahifa"
     },
     "upTo": "{price} gacha",
-    "breadcrumbCatalog": "Turlar"
+    "breadcrumbCatalog": "Turlar",
+    "titleShort": "Tur-paketlar",
+    "foundShort": "{count} ta tur topildi · narxlar bir kishi uchun",
+    "sortShort": {
+      "popular": "Mashhur",
+      "price_asc": "Arzonroq",
+      "price_desc": "Qimmatroq",
+      "date": "Eng yaqin"
+    },
+    "loadMore": "Yana {count} ta turni koʻrsatish",
+    "shown": "{total} tadan {shown} tasi koʻrsatildi"
   },
   "tourPage": {
     "meta": {
@@ -300,7 +334,8 @@
       "selected": "Tanlangan",
       "waitlist": "Kutish roʻyxatiga",
       "dynamic": "Narx talabga qarab oʻzgarishi mumkin. Narx bron qilingan paytda qotiriladi.",
-      "seatsLeft": "{count} ta joy"
+      "seatsLeft": "{count} ta joy",
+      "waitlistShort": "Kutish roʻyxati"
     },
     "route": "Marshrut",
     "routeStops": "Marshrut toʻxtashlari",
@@ -309,7 +344,8 @@
       "afterTrip": "Faqat safardan keyin",
       "count": "{count} ta sharh",
       "all": "Barcha {count} ta sharh",
-      "stars": "5 dan {n}"
+      "stars": "5 dan {n}",
+      "titleShort": "Sharhlar · {rating}"
     },
     "booking": {
       "from": "dan",
@@ -336,7 +372,10 @@
       "individualLink": "Individual tur →",
       "calculating": "Narx hisoblanmoqda…",
       "perAdultShort": "/ kattalar",
-      "less": "Kamroq"
+      "less": "Kamroq",
+      "cancelShort": "{date} gacha bepul bekor qilish (joʻnashdan {days} kun oldin)",
+      "demandShort": "{date} uchun {seats} ta joy qoldi — narx oshishi mumkin",
+      "childrenHintPlain": "12 yoshgacha"
     },
     "individual": {
       "from": "dan",
@@ -390,7 +429,9 @@
     "readLess": "Yigʻish",
     "listTitle": "Oʻzbekiston yoʻnalishlari",
     "listText": "{count} mintaqa — qadimiy shaharlardan togʻ va choʻllargacha",
-    "notFound": "Yoʻnalish topilmadi"
+    "notFound": "Yoʻnalish topilmadi",
+    "heroShort": "{count} ta tur · {rating} ★",
+    "seasonShort": "Mavsum"
   },
   "transferPage": {
     "meta": {
@@ -460,7 +501,8 @@
     "required": "Takliflardan joyni tanlang",
     "over": "Tanlangan sinfda {max} tadan koʻp yoʻlovchi sigʻmaydi",
     "mapLabel": "Marshrut sxemasi",
-    "tooMany": "{max} tadan koʻp toʻxtash mumkin emas"
+    "tooMany": "{max} tadan koʻp toʻxtash mumkin emas",
+    "durationHours": "{h} soat"
   },
   "addonsPage": {
     "meta": {
@@ -492,7 +534,10 @@
     "bindHint": "{number} buyurtmaga biriktirish yoki alohida rasmiylashtirish mumkin",
     "bind": "Buyurtmaga biriktirish",
     "checkout": "Alohida rasmiylashtirish",
-    "empty": "Hech narsa tanlanmagan"
+    "empty": "Hech narsa tanlanmagan",
+    "kidsShort": "Bolalarga",
+    "selectedShort": "{count} ta xizmat",
+    "checkoutShort": "Rasmiylashtirish"
   },
   "waitlistOffer": {
     "meta": {
@@ -523,7 +568,7 @@
     "next": "Keyingisi",
     "prev": "Orqaga",
     "bookingTitle": "Bron qilish",
-    "details": "Tafsilotlar",
+    "details": "Narx tafsilotlari",
     "stepOf": "{n}-qadam, jami 5",
     "stepsNav": "Bron qilish qadamlari",
     "steps": {
@@ -547,7 +592,8 @@
       "points": "Bonus ballar ({count})",
       "penalty": "Penya",
       "total": "Jami",
-      "cancelNote": "{date} gacha bepul bekor qilish. {days} kun ichida 100% qaytariladi."
+      "cancelNote": "{date} gacha bepul bekor qilish. {days} kun ichida 100% qaytariladi.",
+      "metaSeats": "{dates} · joylar {seats}"
     },
     "travellers": {
       "title": "Kim boradi",
@@ -590,7 +636,8 @@
         "GB": "Buyuk Britaniya",
         "DE": "Germaniya"
       },
-      "citizenshipPh": "Mamlakatni tanlang"
+      "citizenshipPh": "Mamlakatni tanlang",
+      "leadShort": "Xorijiy pasportdagidek"
     },
     "seats": {
       "title": "{count} ta joyni tanlang",
@@ -612,7 +659,26 @@
       "progress": "{total} tadan {selected} ta joy tanlandi",
       "need": "Yana {count} ta joyni tanlang",
       "assigned": "Joylar taqsimoti",
-      "next": "Keyingisi: qoʻshimcha xizmatlar"
+      "next": "Keyingisi: qoʻshimcha xizmatlar",
+      "titlePlain": "Joylarni tanlang",
+      "lead": "{vehicle}, {seats} ta joy. {count} ta joy tanlang — har bir sayohatchiga bittadan.",
+      "vehicleTypes": {
+        "sedan": "Sedan",
+        "minivan": "Miniven",
+        "microbus": "Mikroavtobus"
+      },
+      "holdTitle": "Joylar siz uchun {minutes} daqiqaga band qilindi",
+      "holdText": "Taymer ishlayotganda bu joylarni hech kim sota olmaydi. Toʻlashga ulgurmasangiz, bron avtomatik bekor qilinadi.",
+      "yoursFull": "Siz tanlagan",
+      "held": "Siz uchun band (hold)",
+      "unavailable": "Mavjud emas",
+      "withSeatFull": "Bolalar oʻrindiqli joy",
+      "yourSeats": "Joylaringiz",
+      "childSuffix": "bola",
+      "seatChild": "{seat} · bolalar oʻrindigʻi",
+      "unassign": "{seat} joyini olib tashlash",
+      "free_note": "Joy tanlash bepul. Oʻtkazib yuborishingiz mumkin — avtomatik joylashtiramiz.",
+      "notChosen": "tanlanmagan"
     },
     "addons": {
       "title": "Qoʻshimcha xizmatlar",
@@ -623,7 +689,8 @@
       "comment": "Buyurtmaga izoh (ixtiyoriy)",
       "commentPh": "Masalan: bitta kattalar uchun vegetarian menyu",
       "next": "Keyingisi: chegirmalar",
-      "needChild": "Buyurtmada bola boʻlsa mavjud"
+      "needChild": "Buyurtmada bola boʻlsa mavjud",
+      "leadShort": "Oʻtkazib yuborish mumkin"
     },
     "discounts": {
       "title": "Chegirmalar va ballar",
@@ -643,7 +710,12 @@
       "max": "Buyurtmaning eng koʻpi {cap}% — {amount}",
       "refundTitle": "Bekor qilinsa hammasi qaytariladi",
       "refundText": "Buyurtmani bekor qilsangiz, promokod yana faol boʻladi, ballar hisobingizga qaytadi.",
-      "next": "Keyingisi: yakun"
+      "next": "Keyingisi: yakun",
+      "pointsShort": "{count} ball",
+      "pointsRateShort": "= {amount} · buyurtmaning {cap}% gacha",
+      "spendAll": "Barcha ballar yechiladi: −{amount}",
+      "refundTextShort": "Promokod yana faollashadi, ballar hisobga qaytadi.",
+      "discountTotal": "Chegirma −{amount}"
     },
     "review": {
       "title": "Buyurtmani tekshiring",
@@ -667,7 +739,10 @@
       "cancelRestore": "Promokod va bonus ballar tiklanadi",
       "accept": "Oferta shartnomasi va bekor qilish siyosatini qabul qilaman",
       "acceptReq": "Shartlarni qabul qilish kerak",
-      "pay": "Toʻlovga oʻtish · {total}"
+      "pay": "Toʻlovga oʻtish · {total}",
+      "lockedShort": "Narx qayd etildi",
+      "payShort": "Toʻlovga",
+      "cancelShort": "{date} gacha bepul bekor qilish. Pul {refund} kunda qaytadi."
     },
     "payment": {
       "title": "Toʻlov",
@@ -699,7 +774,10 @@
       "cvcBad": "CVC notoʻgʻri",
       "holderBad": "Ismni kartadagidek kiriting",
       "processing": "Ishlanmoqda…",
-      "holdGone": "Bron vaqti tugadi — qaytadan boshlang"
+      "holdGone": "Bron vaqti tugadi — qaytadan boshlang",
+      "ofTotal": "{total} dan · depozit",
+      "payShort": "Toʻlash",
+      "back": "Xulosaga qaytish"
     },
     "status": {
       "pendingTitle": "Toʻlov tasdiqlanmoqda…",
@@ -719,7 +797,9 @@
       "expiredText": "Boshqalar sotib olishi uchun {seats} joylarini boʻshatdik. Sayohatchilar maʼlumotlari saqlangan — qaytadan boshlash bir daqiqa oladi.",
       "expiredStill": "{date} uchun yana {count} ta boʻsh joy bor",
       "restart": "Qaytadan boshlash",
-      "backToTour": "Turga qaytish"
+      "backToTour": "Turga qaytish",
+      "s1Plain": "Toʻlov yaratildi",
+      "expiredTextShort": "{seats} joylari boʻshatildi. Sayohatchilar maʼlumotlari saqlandi."
     },
     "request": {
       "title": "Soʻrov menejerga yuborildi",
@@ -754,7 +834,11 @@
       "payTitle": "Keyingi toʻlov",
       "payText": "{amount} · {date}. {days} kun oldin eslatamiz.",
       "paidTitle": "Toʻliq toʻlangan",
-      "paidText": "Qoʻshimcha toʻlovlar talab qilinmaydi."
+      "paidText": "Qoʻshimcha toʻlovlar talab qilinmaydi.",
+      "titleShort": "Buyurtma tasdiqlandi!",
+      "tgConnectFull": "Telegramni ulash",
+      "voucherShort": "Vaucher",
+      "seatsMeeting": "Joylar {seats} · yigʻilish {time}"
     },
     "errors": {
       "generic": "Nimadir xato ketdi. Qayta urinib koʻring.",
@@ -812,7 +896,11 @@
       "sameText": "Vaucher avtomatik qayta chiqariladi.",
       "pay": "{amount} toʻlash",
       "confirm": "Oʻzgartirishni tasdiqlash",
-      "back": "Orqaga"
+      "back": "Orqaga",
+      "lineAdults": "{count} katta × {price}",
+      "lineChildren": "{count} bola × {price}",
+      "lineDemand": "Talab +{percent}%",
+      "lineDemandNone": "Talab"
     },
     "done": {
       "title": "Buyurtma oʻzgartirildi",
@@ -820,7 +908,9 @@
       "refund": "Qaytarish {amount} — {days} kun ichida.",
       "download": "Yangi vaucherni yuklab olish",
       "toOrder": "Buyurtmaga"
-    }
+    },
+    "current": "Joriy",
+    "seatsKept": "Avvalgi joylaringiz {seats} bu safarda boʻsh — ularni saqlab qoldik."
   },
   "auth": {
     "quote": "«Madrasada tunash va Registondagi tong — bu yilning eng yaxshi lahzasi»",
@@ -939,7 +1029,8 @@
       "book": "Bron qilish",
       "seats": "{seats} joylar",
       "travellers": "{adults} kattalar{children, plural, =0 {} other {, # bola}}",
-      "continue": "Rasmiylashtirishni davom ettirish"
+      "continue": "Rasmiylashtirishni davom ettirish",
+      "metaShort": "{dates} · {count} kishi"
     },
     "order": {
       "back": "Buyurtmalarim",
@@ -1217,7 +1308,8 @@
         "cancelled": "Bekor qilingan",
         "refunded": "Bekor qilingan · qaytarilgan",
         "expired": "Bron muddati tugagan",
-        "completed": "Sayohat yakunlangan"
+        "completed": "Sayohat yakunlangan",
+        "pending": "Tasdiqlanmagan · toʻlanmagan"
       }
     },
     "about": {

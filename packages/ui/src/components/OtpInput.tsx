@@ -11,11 +11,17 @@ export interface OtpInputProps {
 export function OtpInput({ value, onChange, length = 6, helper, error, label, className }: OtpInputProps) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const chars = Array.from({ length }, (_, i) => value[i] ?? '');
+  // Актуальное значение между рендерами: быстрый ввод/автозаполнение не должен терять цифры из-за устаревшего замыкания.
+  const latest = useRef(chars);
+  latest.current = chars;
   const focusAt = (i: number) => refs.current[Math.max(0, Math.min(length - 1, i))]?.focus();
 
-  const set = (i: number, ch: string) => {
-    const next = chars.slice();
-    next[i] = ch;
+  /** Записывает одну или несколько цифр начиная с ячейки i (автозаполнение one-time-code приходит строкой). */
+  const set = (i: number, digits: string) => {
+    const next = latest.current.slice();
+    if (!digits) next[i] = '';
+    digits.split('').forEach((d, k) => { if (i + k < length) next[i + k] = d; });
+    latest.current = next;
     onChange(next.join('').slice(0, length));
   };
   const onKey = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
@@ -39,14 +45,16 @@ export function OtpInput({ value, onChange, length = 6, helper, error, label, cl
               ref={(el) => { refs.current[i] = el; }}
               inputMode="numeric"
               autoComplete={i === 0 ? 'one-time-code' : 'off'}
-              maxLength={1}
+              maxLength={i === 0 ? length : 1}
               value={ch}
               aria-label={`${i + 1} / ${length}`}
               aria-invalid={invalid || undefined}
               onChange={(e) => {
-                const d = e.target.value.replace(/\D/g, '').slice(-1);
+                const raw = e.target.value.replace(/\D/g, '');
+                // Ячейка уже содержала цифру → берём новую (последнюю); иначе — всё введённое (автозаполнение).
+                const d = raw.length > 1 && ch ? raw.slice(-1) : raw.slice(0, length - i);
                 set(i, d);
-                if (d) focusAt(i + 1);
+                if (d) focusAt(i + d.length);
               }}
               onKeyDown={(e) => onKey(i, e)}
               className={cn(

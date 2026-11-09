@@ -3,7 +3,7 @@ import { Alert, Button, Checkbox, Counter, DateInput, PriceRow, SegmentedControl
 import { AddressInput } from '@samanid/ui';
 import { api, type CarClass, type Place, type TransferOptions, type TransferQuote } from '@samanid/api';
 import { intlLocale, type Locale } from '@samanid/i18n';
-import { Bus, Car, GripVertical, Info, MapPin, Plus, Route, Timer, Trash2 } from 'lucide-react';
+import { Bus, Car, Clock, GripVertical, Info, MapPin, Pencil, Plus, Route, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
@@ -28,21 +28,30 @@ function PlaceField({ pt, label, onChange, error, listLabel, placeholder }: { pt
   );
 }
 
-function RouteMap({ pts, order, label }: { pts: Pt[]; order: number[]; label: string }) {
-  const n = order.length; const x = (i: number) => 50 + (i * 600) / Math.max(n - 1, 1); const y = (i: number) => 230 - (i * 150) / Math.max(n - 1, 1) - (i % 2 ? 25 : 0);
-  const path = order.map((_, i) => `${i ? 'L' : 'M'}${x(i)} ${y(i)}`).join(' ');
+function RouteMap({ pts, order, label, badge, className }: { pts: Pt[]; order: number[]; label: string; badge?: string; className?: string }) {
+  // Figma 24:4418: плавная линия маршрута, точки 28px с белой обводкой, подписи — белые «пилюли» (caption, тень sm).
+  const n = order.length;
+  const pos = (i: number) => ({ x: 11 + (i * 74) / Math.max(n - 1, 1), y: 80 - (i * 60) / Math.max(n - 1, 1) - (i % 2 ? 6 : 0) });
+  const p = order.map((_, i) => pos(i));
+  const d = p.map((q, i) => { if (!i) return `M${q.x} ${q.y}`; const a = p[i - 1]!; const mx = (a.x + q.x) / 2; return `C${mx} ${a.y} ${mx} ${q.y} ${q.x} ${q.y}`; }).join(' ');
   return (
-    <div role="img" aria-label={label} className="relative h-[220px] overflow-hidden rounded-2xl bg-primary-50 md:h-[360px]">
-      <svg aria-hidden="true" viewBox="0 0 700 300" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 size-full">
-        <path d={path} fill="none" stroke="var(--color-primary-500)" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" />
-        {order.map((o, i) => <g key={o}><circle cx={x(i)} cy={y(i)} r="10" fill={i === 0 ? 'var(--color-accent-500)' : i === n - 1 ? 'var(--color-dark-900)' : 'var(--color-primary-500)'} stroke="var(--color-white)" strokeWidth="3" />
-          <text x={i === n - 1 ? x(i) - 16 : x(i) + 16} y={y(i) - 14} textAnchor={i === n - 1 ? 'end' : 'start'} fontSize="13" fontWeight="600" fill="var(--color-dark-900)">{letter(i, n - 1)} · {short(pts[o]?.text ?? '')}</text></g>)}
+    <div role="img" aria-label={label} className={cn('relative h-[180px] overflow-hidden rounded-2xl bg-primary-50 md:h-[360px] md:border md:border-dark-200', className)}>
+      {badge && <span aria-hidden="true" className="absolute top-3 left-3 z-10 rounded-sm bg-white px-2.5 py-1.5 text-caption text-dark-900 shadow-sm md:hidden">{badge}</span>}
+      <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full">
+        <path d={d} fill="none" stroke="var(--color-primary-500)" strokeWidth="4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
       </svg>
+      {order.map((o, i) => (
+        <div key={o} aria-hidden="true" className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1" style={{ left: `${p[i]!.x}%`, top: `${p[i]!.y}%` }}>
+          <span className={cn('size-5 shrink-0 rounded-full border-[3px] border-white md:size-7', i === 0 ? 'bg-accent-500' : i === n - 1 ? 'bg-dark-900' : 'bg-primary-500')} />
+          <span className="absolute left-full ml-1 hidden rounded-sm bg-white px-2.5 py-1.5 text-caption whitespace-nowrap text-dark-900 shadow-sm md:block">{letter(i, n - 1)} · {short(pts[o]?.text ?? '')}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
 export function TransferBuilder({ options }: { options: TransferOptions }) {
+  const tA = useTranslations('a11y');
   const t = useTranslations('transferPage');
   const ta = useTranslations('a11y');
   const locale = useLocale() as Locale;
@@ -63,6 +72,7 @@ export function TransferBuilder({ options }: { options: TransferOptions }) {
   const [quote, setQuote] = useState<TransferQuote | null>(null);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
   const seq = useRef(0);
   const drag = useRef<number | null>(null);
   const last = pts.length - 1;
@@ -87,46 +97,62 @@ export function TransferBuilder({ options }: { options: TransferOptions }) {
   const remove = (i: number) => setPts((a) => a.filter((_, j) => j !== i));
   const order = quote?.order ?? pts.map((_, i) => i);
   const dur = quote ? { h: Math.floor(quote.drive_minutes / 60), m: quote.drive_minutes % 60 } : null;
+  const durText = dur ? (dur.m ? t('duration', dur) : t('durationHours', { h: dur.h })) : '—';
   const carName = t(`cars.${car}`);
   const valid = complete && !!date && !over && !!quote;
   const book = () => { setTouched(true); if (!valid) return; router.push({ pathname: '/checkout', query: { type: 'transfer', points: ids.join(','), date: date!, time, pax: String(pax), car, child: child ? '1' : '0' } } as never); };
-  const card = 'flex flex-col gap-5 rounded-xl border border-dark-200 bg-white p-5 md:p-7';
+  const card = 'flex flex-col gap-4 rounded-2xl border border-dark-200 bg-white p-4 md:p-7';
+  // Mobile (25:4464): разделы 2–4 без карточек, заголовки скрыты.
+  const flat = 'flex flex-col gap-4 md:rounded-2xl md:border md:border-dark-200 md:bg-white md:p-7';
   const hd = 'text-h5 text-dark-900';
 
   return (
     <div className="grid gap-6 lg:grid-cols-[640px_1fr] lg:items-start lg:gap-8">
-      <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex min-w-0 flex-col gap-4 md:gap-6">
+        <RouteMap pts={pts} order={order} label={t('mapLabel')} badge={quote ? `${t('km', { km: quote.total_km })} · ${durText}` : undefined} className="lg:hidden" />
         <section aria-labelledby="t-route" className={card}>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"><h2 id="t-route" className={hd}>{t('route')}</h2><Switch label={t('optimize')} checked={optimize} onCheckedChange={setOptimize} /></div>
-          <ol className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 max-md:sr-only"><h2 id="t-route" className={hd}>{t('route')}</h2><Switch label={t('optimize')} checked={optimize} onCheckedChange={setOptimize} /></div>
+          <ol className={cn('flex flex-col gap-3 md:gap-4', pts.every((p) => p.place && editing !== p.id) && 'max-md:hidden')}>
             {pts.map((p, i) => {
               const isMid = i > 0 && i < last; const err = touched && !p.place ? t('required') : undefined;
               return (
                 <li key={p.id} draggable={isMid} onDragStart={() => { drag.current = i; }} onDragOver={(e) => { if (isMid && drag.current !== null) e.preventDefault(); }} onDrop={() => { if (drag.current !== null) move(drag.current, i); drag.current = null; }}
-                  className="grid grid-cols-[28px_minmax(0,1fr)_auto] items-start gap-3 max-md:rounded-lg max-md:border max-md:border-dark-200 max-md:p-3 md:grid-cols-[28px_20px_minmax(0,1fr)_auto]">
-                  <span aria-hidden="true" className={cn('mt-9 flex size-7 items-center justify-center rounded-full text-caption text-white md:mt-9', i === 0 ? 'bg-accent-500' : i === last ? 'bg-dark-900' : 'bg-primary-500')}>{letter(i, last)}</span>
-                  <span className="hidden md:block">{isMid && (
-                    <button type="button" aria-label={t('moveHandle', { n: i })} onKeyDown={(e) => { if (e.key === 'ArrowUp') { e.preventDefault(); move(i, i - 1); } if (e.key === 'ArrowDown') { e.preventDefault(); move(i, i + 1); } }} className="mt-9 cursor-grab text-dark-400 focus-visible:focus-ring"><GripVertical className="size-5" aria-hidden="true" /></button>)}</span>
-                  <PlaceField pt={p} label={i === 0 ? t('from') : i === last ? t('to') : t('stop', { n: i })} placeholder={t('placeholder')} listLabel={t('suggestions')} error={err} onChange={(x) => patch(i, x)} />
-                  <span className="mt-9">{isMid && <button type="button" aria-label={t('removeStop', { n: i })} onClick={() => remove(i)} className="inline-flex size-10 items-center justify-center rounded-full text-error-600 hover:bg-error-100 focus-visible:focus-ring"><Trash2 className="size-5" aria-hidden="true" /></button>}</span>
+                  className={cn('grid grid-cols-[28px_minmax(0,1fr)_auto] items-start gap-3 max-md:rounded-lg max-md:border max-md:border-dark-200 max-md:p-3', isMid ? 'md:grid-cols-[28px_20px_minmax(0,1fr)_48px]' : 'md:grid-cols-[28px_minmax(0,1fr)]', editing !== p.id && p.place && 'max-md:hidden')}>
+                  <span aria-hidden="true" className={cn('mt-9 flex size-7 items-center justify-center rounded-full text-caption text-white md:mt-[38px]', i === 0 ? 'bg-accent-500' : i === last ? 'bg-dark-900' : 'bg-primary-500')}>{letter(i, last)}</span>
+                  {isMid && <span className="hidden md:block">{(
+                    <button type="button" aria-label={t('moveHandle', { n: i })} onKeyDown={(e) => { if (e.key === 'ArrowUp') { e.preventDefault(); move(i, i - 1); } if (e.key === 'ArrowDown') { e.preventDefault(); move(i, i + 1); } }} className="mt-[60px] cursor-grab text-dark-400 focus-visible:focus-ring"><GripVertical className="size-5" aria-hidden="true" /></button>)}</span>}
+                  <PlaceField pt={p} label={i === 0 ? t('from') : i === last ? t('to') : t('stop', { n: i })} placeholder={t('placeholder')} listLabel={t('suggestions')} error={err} onChange={(x) => { patch(i, x); if (x.place) setEditing(null); }} />
+                  {isMid && <span className="mt-7 md:mt-8"><button type="button" aria-label={t('removeStop', { n: i })} onClick={() => remove(i)} className="inline-flex size-12 items-center justify-center rounded-full text-error-600 hover:bg-error-100 focus-visible:focus-ring"><Trash2 className="size-5" aria-hidden="true" /></button></span>}
                 </li>
               );
             })}
           </ol>
+          {/* Mobile 25:4474: компактные строки (метка, подпись, значение, карандаш/ручка); тап — редактирование. */}
+          <ul className="flex flex-col gap-3 md:hidden">
+            {pts.map((p, i) => p.place && editing !== p.id && (
+              <li key={p.id}>
+                <button type="button" onClick={() => setEditing(p.id)} className="flex min-h-[58px] w-full items-center gap-2.5 rounded-lg border border-dark-200 px-3 text-left focus-visible:focus-ring">
+                  <span aria-hidden="true" className={cn('flex size-6 shrink-0 items-center justify-center rounded-full text-caption text-white', i === 0 ? 'bg-accent-500' : i === last ? 'bg-dark-900' : 'bg-primary-500')}>{letter(i, last)}</span>
+                  <span className="flex min-w-0 flex-1 flex-col"><span className="text-caption text-dark-500">{i === 0 ? t('from') : i === last ? t('to') : t('stop', { n: i })}</span><span className="truncate text-body-s-medium text-dark-900">{p.text}</span></span>
+                  {i > 0 && i < last ? <GripVertical className="size-[18px] shrink-0 text-dark-400" aria-hidden="true" /> : <Pencil className="size-[18px] shrink-0 text-dark-400" aria-hidden="true" />}
+                </button>
+              </li>
+            ))}
+          </ul>
           {pts.length - 2 < options.max_stops
-            ? <button type="button" onClick={addStop} className="flex min-h-10 items-center gap-2 self-start text-body-s-medium text-primary-500 focus-visible:focus-ring"><Plus className="size-4" aria-hidden="true" /><span className="max-md:hidden">{t('addStop', { max: options.max_stops })}</span><span className="md:hidden">{t('addStopShort')}</span></button>
+            ? <button type="button" onClick={addStop} className="flex items-center gap-2 self-start rounded-xs text-body-s-medium text-primary-500 focus-visible:focus-ring md:ml-10"><Plus className="size-[18px]" aria-hidden="true" /><span className="max-md:hidden">{t('addStop', { max: options.max_stops })}</span><span className="md:hidden">{t('addStopShort')}</span></button>
             : <p className="text-caption text-dark-500">{t('tooMany', { max: options.max_stops })}</p>}
           {quote && quote.saved_km > 0 && <Alert type="info" title={t('optimized')}>{t('optimizedText', { km: quote.saved_km })}</Alert>}
         </section>
 
-        <section aria-labelledby="t-when" className={card}>
-          <h2 id="t-when" className={hd}>{t('when')}</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+        <section aria-labelledby="t-when" className={flat}>
+          <h2 id="t-when" className={cn(hd, 'max-md:sr-only')}>{t('when')}</h2>
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             <DateInput label={t('date')} placeholder={t('date')} locale={intlLocale[locale]} prevLabel={ta('prevMonth')} nextLabel={ta('nextMonth')} value={date} onValueChange={setDate} />
             <Select label={t('time')} placeholder={t('time')} value={time} onValueChange={setTime} options={options.time_slots.map((s) => ({ value: s, label: s }))} />
           </div>
-          <div className="flex items-center justify-between gap-4"><div><p className="text-body-m-medium text-dark-900">{t('passengers')}</p><p className="text-caption text-dark-500">{t('passengersHint')}</p></div>
-            <Counter label={t('passengers')} value={pax} min={1} max={16} onChange={setPax} decrementLabel="−" incrementLabel="+" /></div>
+          <div className="flex items-center justify-between gap-4"><div><p className="text-body-m-medium text-dark-900">{t('passengers')}</p><p className="text-caption text-dark-500 max-md:hidden">{t('passengersHint')}</p></div>
+            <Counter label={t('passengers')} value={pax} min={1} max={16} onChange={setPax} decrementLabel={tA('decrease')} incrementLabel={tA('increase')} /></div>
           {over && <p role="alert" className="text-caption text-error-700">{t('over', { max: maxPax })}</p>}
           <Checkbox label={<><span className="max-md:hidden">{t('child')}</span><span className="md:hidden">{t('childShort', { price: money(options.child_seat_price, locale) })}</span></>} checked={child} onCheckedChange={(c) => setChild(c === true)} />
           {child && (
@@ -137,7 +163,7 @@ export function TransferBuilder({ options }: { options: TransferOptions }) {
           )}
         </section>
 
-        <section aria-labelledby="t-car" className={card}>
+        <section aria-labelledby="t-car" className={flat}>
           <h2 id="t-car" className={cn(hd, 'max-md:sr-only')}>{t('carClass')}</h2>
           <p className="text-body-m-medium text-dark-900 md:hidden" aria-hidden="true">{t('carClassShort')}</p>
           <div className="md:hidden"><SegmentedControl label={t('carClassShort')} value={car} onValueChange={(v) => setCar(v as CarClass)} options={options.classes.slice(0, 2).map((c) => ({ value: c.id, label: t(`cars.${c.id}`) }))} /></div>
@@ -152,35 +178,35 @@ export function TransferBuilder({ options }: { options: TransferOptions }) {
           </div>
         </section>
 
-        <section aria-labelledby="t-note" className={card}>
+        <section aria-labelledby="t-note" className={flat}>
           <h2 id="t-note" className={cn(hd, 'max-md:sr-only')}>{t('wishes')}</h2>
-          <Textarea label={t('wishesLabel')} placeholder={t('wishesPlaceholder')} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
-          <p className="-mt-3 text-caption text-dark-500">{note.length} / 500</p>
+          <Textarea label={<><span className="md:hidden">{t('wishes')}</span><span className="max-md:hidden">{t('wishesLabel')}</span></>} placeholder={t('wishesPlaceholder')} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+          <p className="-mt-3 text-caption text-dark-500 max-md:hidden">{note.length} / 500</p>
           <div className="flex flex-wrap gap-2 max-md:hidden">{(['sign', 'wait', 'luggage'] as const).map((k) => <button key={k} type="button" onClick={() => setNote((n) => (n ? `${n}\n` : '') + t(`chips.${k}`).replace(/^\+\s*/, ''))} className="min-h-10 rounded-full border border-dark-200 bg-white px-4 text-body-s text-dark-700 hover:bg-dark-100 focus-visible:focus-ring">{t(`chips.${k}`)}</button>)}</div>
         </section>
       </div>
 
       <aside className="flex min-w-0 flex-col gap-5 lg:sticky lg:top-24" id="breakdown">
-        <RouteMap pts={pts} order={order} label={t('mapLabel')} />
+        <RouteMap pts={pts} order={order} label={t('mapLabel')} className="max-lg:hidden" />
         <ul className="grid grid-cols-3 gap-3 max-md:hidden">
-          {[{ I: Route, v: quote ? t('km', { km: quote.total_km }) : '—', l: t('kmLabel') }, { I: Timer, v: dur ? t('duration', dur) : '—', l: t('timeLabel') }, { I: MapPin, v: String(Math.max(pts.length - 2, 0)), l: t('stopsLabel', { count: Math.max(pts.length - 2, 0) }) }].map(({ I, v, l }) => (
-            <li key={l} className="flex items-center gap-3 rounded-lg border border-dark-200 bg-white p-4"><I className="size-6 shrink-0 text-primary-500" aria-hidden="true" /><div><p className="text-body-m-medium text-dark-900">{v}</p><p className="text-caption text-dark-500">{l}</p></div></li>))}
+          {[{ I: Route, v: quote ? t('km', { km: quote.total_km }) : '—', l: t('kmLabel') }, { I: Clock, v: durText, l: t('timeLabel') }, { I: MapPin, v: String(Math.max(pts.length - 2, 0)), l: t('stopsLabel', { count: Math.max(pts.length - 2, 0) }) }].map(({ I, v, l }) => (
+            <li key={l} className="flex items-center gap-3 rounded-lg border border-dark-200 bg-white p-4"><I className="size-[22px] shrink-0 text-primary-500" aria-hidden="true" /><div><p className="text-body-m-medium text-dark-900">{v}</p><p className="text-caption text-dark-500">{l}</p></div></li>))}
         </ul>
-        <div className="rounded-xl border border-dark-200 bg-white p-6" aria-live="polite" aria-busy={loading}>
-          <h2 className="text-h6 text-dark-900">{t('breakdown')}</h2>
+        <div className="rounded-xl border border-dark-200 bg-white p-5 md:rounded-2xl md:p-7" aria-live="polite" aria-busy={loading}>
+          <h2 className="text-h5 text-dark-900">{t('breakdown')}</h2>
           {!complete ? <p className="mt-4 text-body-s text-dark-500">{t('needPoints')}</p> : !quote ? <p className="mt-4 text-body-s text-dark-500">{t('calculating')}</p> : (
             <>
-              <div className="mt-4 flex flex-col gap-3">
+              <div className="mt-3 flex flex-col gap-3">
                 {quote.lines.map((l, i) => {
                   const label = l.kind === 'base' ? t('baseFareFor', { car: carName }) : l.kind === 'segment' ? t('segment', { label: `${letter(l.segment!, quote.segments.length)} → ${letter(l.segment! + 1, quote.segments.length)} · ${short(pts.find((p) => p.place?.id === quote.segments[l.segment!]!.from)?.text ?? '')} → ${short(pts.find((p) => p.place?.id === quote.segments[l.segment!]!.to)?.text ?? '')}`, km: l.km }) : l.kind === 'time' ? t('drive', { h: dur!.h, m: dur!.m, rate: money(options.hourly_rate, locale) }) : t('seatLine');
                   return <PriceRow key={i} label={label} amount={money2(l.amount, locale)} />;
                 })}
               </div>
-              <div className="mt-4"><PriceRow type="total" label={t('total')} amount={money2(quote.total, locale)} /></div>
+              <div className="mt-3"><PriceRow type="total" label={t('total')} amount={money2(quote.total, locale)} /></div>
               <p className="mt-3 flex items-start gap-2 text-caption text-dark-500"><Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{t('note', { minutes: options.free_wait_minutes })}</p>
             </>
           )}
-          <Button variant="primary" size="L" className="mt-5 w-full max-md:hidden" onClick={book} disabled={!!(touched && !valid)}>{t('book')}</Button>
+          <Button variant="primary" size="L" className="mt-3 w-full max-md:hidden" onClick={book} disabled={!!(touched && !valid)}>{t('book')}</Button>
         </div>
       </aside>
 

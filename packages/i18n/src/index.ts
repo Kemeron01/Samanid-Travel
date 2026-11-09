@@ -1,6 +1,9 @@
 import ru from './locales/ru.json';
 import en from './locales/en.json';
 import uz from './locales/uz.json';
+import adminRu from './admin/ru.json';
+import adminUz from './admin/uz.json';
+import adminEn from './admin/en.json';
 
 export const locales = ['ru', 'uz', 'en'] as const;
 export type Locale = (typeof locales)[number];
@@ -8,6 +11,10 @@ export const defaultLocale: Locale = 'ru';
 
 export const messages = { ru, uz, en } as const;
 export type Messages = typeof ru;
+
+/** Словари админки — отдельно, чтобы не попадать в бандл публичного сайта. Формат i18next: {{var}}. */
+export const adminMessages = { ru: adminRu, uz: adminUz, en: adminEn } as const;
+export type AdminMessages = typeof adminRu;
 
 export const intlLocale: Record<Locale, string> = { ru: 'ru-RU', uz: 'uz-UZ', en: 'en-US' };
 

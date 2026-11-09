@@ -29,7 +29,7 @@ export function AddonsStep({ order }: { order: Order }) {
   const list = (data ?? []).filter((a) => STEP_ADDONS.includes(a.id));
   const price = (a: Addon) => a.unit === 'person' ? t('person', { price: money(a.price, locale), count: pax, total: money(a.price * pax, locale) }) : a.unit === 'group' ? t('group', { price: money(a.price, locale) }) : t('trip', { price: money(a.price, locale) });
   return (
-    <CheckoutShell order={order} step="addons" title={t('title')} lead={t('lead')}
+    <CheckoutShell order={order} step="addons" title={t('title')} lead={t('lead')} leadShort={t('leadShort')}
       nav={{ backHref: `/checkout/${order.id}/seats`, nextLabel: t('next'), loading: patch.isPending, onNext: async () => { await patch.mutateAsync({ addon_ids: ids, comment }); router.push(`/checkout/${order.id}/discounts` as never); } }}>
       <ul className="grid gap-4 md:grid-cols-2">
         {list.map((a) => { const I = icons[a.icon]; const disabled = a.id === 'seat' && !hasChild; const on = ids.includes(a.id) && !disabled; return (

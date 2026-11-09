@@ -37,5 +37,12 @@ export default async function ToursPage({ params, searchParams }: { params: Prom
   setRequestLocale(locale);
   const query = parse(await searchParams);
   const [data, destinations] = await Promise.all([api.toursPage(query), api.destinations()]);
-  return <CatalogView query={query} data={data} destinations={destinations} />;
+  // Пустая выдача (Figma 19:2157): ослабляем бюджет и даты — «от $N» и подборка «Возможно, вам подойдёт».
+  let relaxed: { minPrice?: number; items: typeof data.items } | undefined;
+  if (data.total === 0) {
+    const r = await api.toursPage({ ...query, price_min: undefined, price_max: undefined, date_from: undefined, date_to: undefined, page: 1, per_page: 50 });
+    const pool = r.items.length ? r.items : (await api.toursPage({ sort: 'popular', per_page: 2 })).items;
+    relaxed = { minPrice: r.items.length ? Math.min(...r.items.map((t) => t.price_from)) : undefined, items: pool.slice(0, 2) };
+  }
+  return <CatalogView query={query} data={data} destinations={destinations} relaxed={relaxed} />;
 }

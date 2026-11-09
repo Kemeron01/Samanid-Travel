@@ -4,7 +4,7 @@ import { cn } from '../cn';
 import { FieldShell } from './Field';
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string; helper?: string; error?: string;
+  label?: React.ReactNode; helper?: string; error?: string;
 }
 
 export function Textarea({ label, helper, error, id, className, disabled, required, ...rest }: TextareaProps) {

@@ -21,7 +21,7 @@ export const fieldInputClass =
 export function FieldShell({
   id, label, helper, error, required, children, className,
 }: {
-  id: string; label?: string; helper?: string; error?: string; required?: boolean;
+  id: string; label?: React.ReactNode; helper?: string; error?: string; required?: boolean;
   children: React.ReactNode; className?: string;
 }) {
   const describedBy = error ? `${id}-error` : helper ? `${id}-helper` : undefined;

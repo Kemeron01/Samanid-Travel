@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayMonth, formatPriceFrom, messages } from './index';
+import { adminMessages, formatDayMonth, formatPriceFrom, messages } from './index';
+
+const keys = (o: object, p = ''): string[] => Object.entries(o).flatMap(([k, v]) => (v && typeof v === 'object' ? keys(v, `${p}${k}.`) : [`${p}${k}`])).sort();
 
 describe('i18n formatters', () => {
   it('price template per locale', () => {
@@ -18,5 +20,14 @@ describe('i18n formatters', () => {
   });
   it('uz uses U+02BB', () => {
     expect(JSON.stringify(messages.uz)).not.toContain('‘');
+  });
+  it('same keys in RU/UZ/EN (site and admin)', () => {
+    for (const dict of [messages, adminMessages]) {
+      expect(keys(dict.uz)).toEqual(keys(dict.ru));
+      expect(keys(dict.en)).toEqual(keys(dict.ru));
+    }
+  });
+  it('admin uz uses U+02BB', () => {
+    expect(JSON.stringify(adminMessages.uz)).not.toMatch(/[‘']/);
   });
 });

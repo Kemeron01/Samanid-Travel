@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "web", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@samanid/web", "dev"], "port": 3000 }
+    { "name": "web", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@samanid/web", "dev"], "port": 3000 },
+    { "name": "admin", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@samanid/admin", "dev"], "port": 5174 }
   ]
 }

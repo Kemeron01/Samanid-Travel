@@ -8,3 +8,9 @@
   body { background: var(--color-bg-page); color: var(--color-dark-900); overflow-x: clip; }
   :focus-visible { box-shadow: var(--focus-ring); outline: none; }
 }
+
+/* Печать документов (юр. страницы: «Скачать PDF» → печать, пока API не отдаёт PDF). */
+@media print {
+  header, footer, [data-print-hide] { display: none !important; }
+  body { background: var(--color-white); }
+}

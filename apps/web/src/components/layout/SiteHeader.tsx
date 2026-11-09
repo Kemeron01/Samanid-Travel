@@ -26,9 +26,11 @@ export function SiteHeader() {
 
   const changeLocale = (code: string) => router.replace(pathname as never, { locale: code as Locale });
 
+  // Mobile checkout (30:1680): вместо шапки сайта — своя панель «← Бронирование» в CheckoutShell.
+  const bare = /^\/(checkout\/[^/]+\/(travellers|seats|addons|discounts|review|payment|pending|failed|expired)|account\/.+|orders\/[^/]+\/change)(\/|$)/.test(pathname);
   return (
     <>
-      <Header
+      <div className={cn('contents', bare && 'max-md:hidden')}><Header
         nav={nav}
         language={{ value: locale, options: locales.map((c) => ({ code: c, name: langNames[c] })), onChange: changeLocale, label: t('a11y.language') }}
         user={user ? { initials: `${user.first_name[0] ?? ''}${user.last_name[0] ?? ''}`.toUpperCase(), name: user.first_name, href: '/account' } : undefined}
@@ -36,7 +38,7 @@ export function SiteHeader() {
         favoritesLabel={t('a11y.favorites')} favoritesHref="/account/favorites"
         menuLabel={t('a11y.openMenu')} onMenuClick={() => setMenu(true)}
         Link={AppLink}
-      />
+      /></div>
       <Modal open={menu} onOpenChange={setMenu} title="Samanid Travel" closeLabel={t('a11y.closeMenu')}>
         <nav aria-label="Main" className="flex flex-col">
           {nav.map((n) => (

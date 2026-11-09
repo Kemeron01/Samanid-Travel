@@ -9,10 +9,10 @@ export function ReadMore({ paragraphs }: { paragraphs: string[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div>
-      <div className={cn('flex flex-col gap-3 text-body-s text-dark-600 md:text-body-l md:text-dark-700', !open && 'max-md:line-clamp-3')}>
+      <div className={cn('flex flex-col gap-3 text-body-m text-dark-700 md:text-body-l', !open && 'max-md:line-clamp-3')}>
         {paragraphs.map((p, i) => <p key={i} className={i > 0 ? 'md:text-body-m md:text-dark-600' : ''}>{p}</p>)}
       </div>
-      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="mt-3 min-h-10 text-body-s-medium text-primary-500 focus-visible:focus-ring md:hidden">{open ? t('readLess') : t('readMore')}</button>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="mt-4 rounded-xs text-body-s-medium text-primary-500 focus-visible:focus-ring md:hidden">{open ? t('readLess') : t('readMore')}</button>
     </div>
   );
 }

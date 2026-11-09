@@ -1,6 +1,6 @@
 'use client';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CircleAlert, CircleCheck, CircleX, Clock, Info, RefreshCw, Search, WifiOff, X } from 'lucide-react';
+import { TriangleAlert, CircleAlert, CircleCheck, CircleX, Clock, Info, RefreshCw, Search, WifiOff, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../cn';
 import { Button } from './Button';
@@ -23,9 +23,11 @@ export function Modal({ open, onOpenChange, title, description, children, footer
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-dark-900/50" />
         <Dialog.Content
-          className="fixed z-50 flex flex-col gap-5 bg-white p-7 shadow-lg focus:outline-none max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[90dvh] max-md:overflow-y-auto max-md:rounded-t-2xl max-md:pb-[max(1.75rem,env(safe-area-inset-bottom))] md:left-1/2 md:top-1/2 md:w-[520px] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl"
+          className="fixed z-50 flex flex-col gap-5 bg-white p-7 shadow-lg focus:outline-none max-md:inset-x-0 max-md:bottom-0 max-md:px-4 max-md:pt-3 max-md:max-h-[90dvh] max-md:overflow-y-auto max-md:rounded-t-2xl max-md:pb-[max(1.75rem,env(safe-area-inset-bottom))] md:left-1/2 md:top-1/2 md:w-[520px] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl"
         >
-          <div className="flex items-start justify-between gap-4">
+          {/* Figma 20:2560: «ручка» нижней шторки 40×4 */}
+          <div aria-hidden="true" className="mx-auto h-1 w-10 shrink-0 rounded-full bg-dark-300 md:hidden" />
+          <div className="flex items-center justify-between gap-4">
             <Dialog.Title className="text-h4 text-dark-900">{title}</Dialog.Title>
             <Dialog.Close asChild><IconButton label={closeLabel}><X className="size-5" aria-hidden="true" /></IconButton></Dialog.Close>
           </div>
@@ -43,7 +45,7 @@ export type AlertType = 'info' | 'success' | 'warning' | 'error';
 const alertStyle: Record<AlertType, { box: string; title: string; icon: ReactNode }> = {
   info: { box: 'border-primary-500 bg-primary-50', title: 'text-primary-600', icon: <Info className="text-primary-500" /> },
   success: { box: 'border-success-600 bg-success-100', title: 'text-success-700', icon: <CircleCheck className="text-success-700" /> },
-  warning: { box: 'border-warning-500 bg-warning-100', title: 'text-warning-700', icon: <CircleAlert className="text-warning-700" /> },
+  warning: { box: 'border-warning-500 bg-warning-100', title: 'text-warning-700', icon: <TriangleAlert className="text-warning-700" /> },
   error: { box: 'border-error-600 bg-error-100', title: 'text-error-700', icon: <CircleX className="text-error-700" /> },
 };
 
@@ -114,10 +116,11 @@ export function HoldTimer({ remainingSeconds, labels, className, compact }: {
   const state = holdState(remainingSeconds);
   const minutes = Math.ceil(Math.max(0, remainingSeconds) / 60);
   return (
-    <div className={cn('inline-flex items-center gap-2.5 rounded-full border px-4 py-2.5', holdStyle[state], className)}>
-      <Clock className="size-[18px]" aria-hidden="true" />
+    // Mobile compact (30:1778): маленькая «пилюля» без рамки — часы 16px + мм:сс.
+    <div className={cn('inline-flex items-center gap-2.5 rounded-full border px-4 py-2.5', holdStyle[state], compact && 'max-md:gap-1.5 max-md:border-transparent max-md:px-3 max-md:py-1.5', className)}>
+      <Clock className={cn('size-[18px]', compact && 'max-md:size-4')} aria-hidden="true" />
       <span className={cn('text-body-s-medium', compact && 'max-md:sr-only')}>{labels[state]}</span>
-      <span aria-hidden="true" className="text-[16px] leading-6 font-extrabold tabular-nums">{formatMmSs(remainingSeconds)}</span>
+      <span aria-hidden="true" className={cn('text-[16px] leading-6 font-extrabold tabular-nums', compact && 'max-md:text-body-s-medium')}>{formatMmSs(remainingSeconds)}</span>
       <span className="sr-only" role="timer" aria-live="polite" aria-atomic="true" key={state === 'expired' ? 'e' : minutes}>
         {state === 'expired' ? labels.expired : `${labels[state]}: ${minutes}`}
       </span>

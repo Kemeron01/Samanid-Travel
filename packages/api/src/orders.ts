@@ -89,12 +89,20 @@ const save = (m: Record<string, Order>) => write(KEY, m);
 const put = (o: Order) => { const m = load(); const full = { ...o, snapshot: snapshot(o) }; m[o.id] = full; save(m); return full; };
 
 export interface ChangeRequest { departure_id?: string; seats?: string[]; addon_ids?: string[]; travellers?: Traveller[] }
-export interface Breakdown { tour: number; addons: number; discounts: number; total: number }
+/** Пересчёт для 2.9c: агрегаты + строки «2 взр. × $640», «Спрос +6%», «Допуслуги», «Скидки» (Figma 32:2590). */
+export interface Breakdown { tour: number; addons: number; discounts: number; total: number; departure_from: string; lines: { kind: 'adults' | 'children' | 'dynamic' | 'addons' | 'discounts'; count?: number; unit_price?: number; percent?: number; amount: number }[] }
 export interface ChangePreview { change_id: string; before: Breakdown; after: Breakdown; delta: number; refund_days: number; new_departure: { id: string; from: string; to: string }; hold_expires_at: string }
 const CKEY = 'st_changes_v1';
-const breakdown = (sn: OrderSnapshot): Breakdown => {
+const breakdown = (sn: OrderSnapshot, departure_from: string): Breakdown => {
   const sum = (ks: PriceLine['kind'][]) => sn.lines.filter((l) => ks.includes(l.kind)).reduce((a, l) => a + l.amount, 0);
-  return { tour: sum(['adults', 'children', 'dynamic']), addons: sum(['addon']), discounts: sum(['promo', 'points']), total: sn.total };
+  const pick = (k: 'adults' | 'children') => sn.lines.find((l) => l.kind === k);
+  const ad = pick('adults'); const ch = pick('children'); const dyn = sn.lines.find((l) => l.kind === 'dynamic');
+  const lines: Breakdown['lines'] = [];
+  if (ad) lines.push({ kind: 'adults', count: ad.count, unit_price: ad.unit_price, amount: ad.amount });
+  if (ch) lines.push({ kind: 'children', count: ch.count, unit_price: ch.unit_price, amount: ch.amount });
+  lines.push({ kind: 'dynamic', percent: dyn?.percent, amount: dyn?.amount ?? 0 });
+  lines.push({ kind: 'addons', amount: sum(['addon']) }, { kind: 'discounts', amount: sum(['promo', 'points']) });
+  return { tour: sum(['adults', 'children', 'dynamic']), addons: sum(['addon']), discounts: sum(['promo', 'points']), total: sn.total, departure_from, lines };
 };
 function applyChange(o: Order, c: ChangeRequest): Order {
   let next: Order = { ...o };
@@ -118,11 +126,12 @@ const SEAT_ROWS: SeatCellDto[][] = [
 export interface Profile { email: string; phone: string; full_name: string; birth_date: string; citizenship: string; passport_expires: string }
 export const ordersApi = {
   async profile(): Promise<Profile> { return { email: 'aziz@example.com', phone: '90 123 45 67', full_name: 'AZIZOV AZIZ', birth_date: '1994-03-14', citizenship: 'UZ', passport_expires: '2031-08-12' }; },
-  async create(r: { tour: string; departure: string; adults: number; children: number }): Promise<Order> {
+  /** POST /orders. waitlist_offer_id — место уже закреплено за человеком из листа ожидания, поэтому «нет мест» не применяется. */
+  async create(r: { tour: string; departure: string; adults: number; children: number; waitlist_offer_id?: string }): Promise<Order> {
     await sleep(150);
     const t = fx.tours.find((x) => x.slug === r.tour); if (!t) throw new Error('tour not found');
     const d = fx.buildDetail(t); const dep = d.departures.find((x) => x.id === r.departure); if (!dep) throw new Error('departure not found');
-    if (dep.seats_left === 0) throw new Error('sold_out');
+    if (dep.seats_left === 0 && !r.waitlist_offer_id) throw new Error('sold_out');
     const seq = read<number>(NKEY, 4811) + 1; write(NKEY, seq);
     const travellers: Traveller[] = [
       ...Array.from({ length: r.adults }, (_, i) => ({ id: uid(), kind: 'adult' as const, full_name: '', birth_date: '', citizenship: 'UZ', passport_expires: '', _i: i })),
@@ -152,7 +161,7 @@ export const ordersApi = {
     await sleep(250); const o = load()[id]; if (!o) throw new Error('not_found');
     const after = applyChange(o, c); const change_id = `chg_${uid()}`;
     const all = read<Record<string, { order_id: string; c: ChangeRequest }>>(CKEY, {}); all[change_id] = { order_id: id, c }; write(CKEY, all);
-    return { change_id, before: breakdown(o.snapshot), after: breakdown(after.snapshot), delta: after.snapshot.total - o.snapshot.total, refund_days: settingsNow().refund_days, new_departure: { id: after.departure.id, from: after.departure.from, to: after.departure.to }, hold_expires_at: new Date(Date.now() + settingsNow().hold_minutes * 60_000).toISOString() };
+    return { change_id, before: breakdown(o.snapshot, o.departure.from), after: breakdown(after.snapshot, after.departure.from), delta: after.snapshot.total - o.snapshot.total, refund_days: settingsNow().refund_days, new_departure: { id: after.departure.id, from: after.departure.from, to: after.departure.to }, hold_expires_at: new Date(Date.now() + settingsNow().hold_minutes * 60_000).toISOString() };
   },
   /** POST /orders/{id}/change — применяет изменение; ваучер перевыпускается автоматически. */
   async changeConfirm(id: string, changeId: string): Promise<{ order: Order; delta: number }> {
@@ -162,6 +171,10 @@ export const ordersApi = {
     return { order: saved, delta: saved.snapshot.total - before };
   },
   async seatMap(_departure: string): Promise<SeatCellDto[][]> { await sleep(80); return SEAT_ROWS; },
+  /** Транспорт выезда (Figma 27:617: «Минивэн Mercedes Sprinter, 18 мест»). */
+  async vehicle(_departure: string): Promise<{ type: 'sedan' | 'minivan' | 'microbus'; model: string; seats: number }> {
+    await sleep(40); return { type: 'minivan', model: 'Mercedes Sprinter', seats: SEAT_ROWS.flat().filter((c) => c.kind !== 'aisle').length };
+  },
   async applyPromo(id: string, code: string): Promise<Order> {
     await sleep(250); const o = load()[id]; if (!o) throw new Error('not_found'); const c = code.trim().toUpperCase();
     if (!PROMOS[c]) throw new Error('promo_invalid'); return put({ ...o, promo_code: c });

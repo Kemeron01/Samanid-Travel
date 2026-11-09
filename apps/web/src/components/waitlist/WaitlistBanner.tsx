@@ -21,11 +21,14 @@ function Inner({ offer, onClose }: { offer: WaitlistOffer; onClose: () => void }
   const locale = useLocale() as Locale; const router = useRouter(); const left = useCountdown(offer.expires_at);
   if (left === 0) return null;
   return (
-    <div role="status" className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-3 bg-success-600 px-4 py-2 text-body-s-medium text-white">
-      <Bell className="size-5 shrink-0" aria-hidden="true" />
-      <span>{t('banner', { title: offer.tour.title, date: dayMonth(offer.from, locale), seats: t('seats', { count: offer.seats }).replace(/ \(.*\)/, ''), time: hms(left) })}</span>
-      <Button size="M" variant="primary" onClick={() => router.push(`/waitlist/offer/${offer.id}` as never)}>{t('bannerBook')}</Button>
-      <IconButton label={t('bannerClose')} onClick={onClose} className="text-white hover:bg-white/15"><X className="size-5" aria-hidden="true" /></IconButton>
+    // Figma 26:5006: полоса на всю ширину, контент по сетке 80px, текст слева (Body M Medium), справа CTA M и «×».
+    <div role="status" className="sticky top-0 z-50 bg-success-600 text-white">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 md:flex-nowrap md:px-20 md:py-3.5">
+      <Bell className="size-[22px] shrink-0" aria-hidden="true" />
+      <span className="min-w-0 flex-1 text-body-s-medium md:text-body-m-medium">{t('banner', { title: offer.tour.title, date: dayMonth(offer.from, locale), seats: t('seats', { count: offer.seats }).replace(/ \(.*\)/, ''), time: hms(left) })}</span>
+      <Button size="M" variant="primary" className="shrink-0" onClick={() => router.push(`/waitlist/offer/${offer.id}` as never)}>{t('bannerBook')}</Button>
+      <IconButton label={t('bannerClose')} onClick={onClose} className="-mr-2.5 text-white hover:bg-white/15"><X className="size-5" aria-hidden="true" /></IconButton>
+      </div>
     </div>
   );
 }

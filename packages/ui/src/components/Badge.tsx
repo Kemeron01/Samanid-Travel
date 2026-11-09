@@ -63,7 +63,7 @@ export interface ChipProps {
 export function Chip({ children, selected, onClick, onRemove, removeLabel, className }: ChipProps) {
   const active = selected || Boolean(onRemove);
   const cls = cn(
-    'inline-flex min-h-10 items-center gap-2 rounded-full border px-4 py-2 text-body-s-medium focus-visible:focus-ring',
+    'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-body-s-medium focus-visible:focus-ring',
     active ? 'border-primary-500 bg-primary-50 text-primary-600' : 'border-dark-200 bg-white text-dark-700 hover:bg-dark-100',
     className,
   );
@@ -71,7 +71,7 @@ export function Chip({ children, selected, onClick, onRemove, removeLabel, class
     return (
       <span className={cls}>
         {children}
-        <button type="button" onClick={onRemove} aria-label={removeLabel} className="inline-flex size-6 items-center justify-center rounded-full focus-visible:focus-ring">
+        <button type="button" onClick={onRemove} aria-label={removeLabel} className="-my-0.5 -mr-1 inline-flex size-6 items-center justify-center rounded-full hover:bg-primary-100 focus-visible:focus-ring">
           <X className="size-3.5" aria-hidden="true" />
         </button>
       </span>

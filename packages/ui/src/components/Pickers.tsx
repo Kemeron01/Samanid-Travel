@@ -127,7 +127,9 @@ export function DateInput({ value, onValueChange, locale, placeholder, prevLabel
 /** Figma: Input / Date range. */
 export function DateRangeInput({ value, onValueChange, locale, placeholder, prevLabel, nextLabel, hint, minDate, maxDate, ...f }: DateBase & { value: ISODate[]; onValueChange: (v: ISODate[]) => void }) {
   const [s, e] = value;
-  const display = s ? `${formatISO(s, locale)}${e ? ` – ${formatISO(e, locale)}` : ' –'}` : undefined;
+  // Figma 19:1261: «12 мая — 31 мая 2027» — длинное тире, год только у конечной даты (без «г.»).
+  const withYear = (d: ISODate) => `${formatISO(d, locale)}${locale.startsWith('en') ? ',' : ''} ${d.slice(0, 4)}`;
+  const display = s ? `${formatISO(s, locale)} — ${e ? withYear(e) : ''}`.trimEnd() : undefined;
   return (
     <DatePopover {...f} placeholder={placeholder} display={display}
       calendar={(close) => <Calendar mode="range" value={value} onChange={(v) => { onValueChange(v); if (v.length === 2) close(); }} locale={locale} minDate={minDate} maxDate={maxDate} prevLabel={prevLabel} nextLabel={nextLabel} hint={hint} />} />

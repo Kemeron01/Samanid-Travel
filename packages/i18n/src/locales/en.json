@@ -36,7 +36,9 @@
     "prev": "Back",
     "next": "Next",
     "prevMonth": "Previous month",
-    "nextMonth": "Next month"
+    "nextMonth": "Next month",
+    "decrease": "Decrease",
+    "increase": "Increase"
   },
   "header": {
     "login": "Sign in",
@@ -112,13 +114,18 @@
       "badge": "{rating} out of 5 · {count}+ traveller reviews",
       "title": "Discover Uzbekistan with Samanid Travel",
       "subtitle": "Group and private tours along the Great Silk Road, transfers and add-ons. Book in 5 minutes, full refund on cancellation.",
-      "heroAlt": "Registan at sunset"
+      "heroAlt": "Registan at sunset",
+      "subtitleShort": "Silk Road tours, transfers and add-ons. Full refund on cancellation."
     },
     "stats": {
       "travellers": "travellers since 2014",
       "tours": "signature tours across {count} destinations",
       "rating": "average rating from {count} reviews",
-      "penalty": "cancellation fee — full refund"
+      "penalty": "cancellation fee — full refund",
+      "travellersShort": "travellers",
+      "toursShort": "signature tours",
+      "ratingShort": "average rating",
+      "penaltyShort": "cancellation fee"
     },
     "seasonal": {
       "title": "Seasonal collections",
@@ -136,15 +143,19 @@
       "tag": "Holiday tour",
       "daysDeparture": "{days} days, departs {date}",
       "group": "Group up to {max} people, guide in Russian and English",
-      "priceInstallments": "{price} per person · {count} instalments",
+      "priceInstallments": "from {price} per person · {count} instalments",
       "view": "View tour",
-      "all": "All holidays"
+      "all": "All holidays",
+      "summary": "{dates} · group of up to {max} · from {price}, {count} instalments"
     },
     "destinations": {
       "title": "Popular destinations",
       "subtitle": "{count} regions — from ancient cities to mountains and deserts",
       "all": "All destinations",
-      "meta": "{count} tours · from {price}"
+      "meta": "{count} tours · from {price}",
+      "titleShort": "Destinations",
+      "allShort": "All",
+      "metaShort": "{count} tours"
     },
     "why": {
       "title": "Why you can travel with peace of mind",
@@ -157,19 +168,30 @@
       "seatTitle": "Your own bus seat",
       "seatText": "Pick seats on the vehicle map, like on a plane. One seat — one owner.",
       "voucherTitle": "Voucher in Telegram",
-      "voucherText": "PDF voucher with a QR code, departure and payment reminders — by email and Telegram."
+      "voucherText": "PDF voucher with a QR code, departure and payment reminders — by email and Telegram.",
+      "refundTextShort": "Up to {days} days before departure, refund within {refund} days",
+      "refundTextShortNoDeadline": "Refund within {refund} days",
+      "installmentTextShort": "A deposit secures your seat",
+      "seatTextShort": "Pick seats on the map",
+      "voucherTextShort": "QR code and reminders"
     },
     "reviews": {
       "title": "What travellers say",
       "subtitle": "Reviews are left only after a completed trip",
       "verified": "Verified trip",
       "prev": "Previous reviews",
-      "next": "Next reviews"
+      "next": "Next reviews",
+      "titleShort": "Reviews",
+      "subtitleShort": "Only after a completed trip",
+      "all": "All"
     },
     "referral": {
       "title": "Invite friends — travel for less",
       "text": "You and your friend each get {points} bonus points ({usd}) after their first paid trip. Points can cover up to {cap}% of your next order.",
-      "cta": "Get my code"
+      "cta": "Get my code",
+      "titleShort": "Invite a friend — you both get {points} points",
+      "textShort": "Credited after your friend's first paid trip.",
+      "ctaShort": "Get code"
     },
     "subscribe": {
       "title": "Collections and deals once a month",
@@ -245,9 +267,11 @@
     "openFilters": "Filters",
     "filtersCount": "Filters · {count}",
     "empty": {
-      "title": "Nothing found",
+      "title": "No tours match your filters",
       "text": "Try changing the dates or removing some filters",
-      "reset": "Reset filters"
+      "reset": "Reset filters",
+      "textFrom": "Matching tours start from {price}. Try a higher budget or other dates.",
+      "suggest": "You might like"
     },
     "pagination": {
       "nav": "Pages",
@@ -255,7 +279,17 @@
       "next": "Next page"
     },
     "upTo": "up to {price}",
-    "breadcrumbCatalog": "Tours"
+    "breadcrumbCatalog": "Tours",
+    "titleShort": "Tour packages",
+    "foundShort": "{count, plural, one {# tour found} other {# tours found}} · prices per person",
+    "sortShort": {
+      "popular": "Popular",
+      "price_asc": "Cheapest",
+      "price_desc": "Priciest",
+      "date": "Soonest"
+    },
+    "loadMore": "{count, plural, one {Show # more tour} other {Show # more tours}}",
+    "shown": "Showing {shown} of {total}"
   },
   "tourPage": {
     "meta": {
@@ -300,7 +334,8 @@
       "selected": "Selected",
       "waitlist": "Join waitlist",
       "dynamic": "The price may change with demand. It is fixed at the moment of booking.",
-      "seatsLeft": "{count, plural, one {# seat} other {# seats}}"
+      "seatsLeft": "{count, plural, one {# seat} other {# seats}}",
+      "waitlistShort": "Waitlist"
     },
     "route": "Route",
     "routeStops": "Route stops",
@@ -309,7 +344,8 @@
       "afterTrip": "After the trip only",
       "count": "{count} reviews",
       "all": "All {count} reviews",
-      "stars": "{n} of 5"
+      "stars": "{n} of 5",
+      "titleShort": "Reviews · {rating}"
     },
     "booking": {
       "from": "from",
@@ -336,7 +372,10 @@
       "individualLink": "Private tour →",
       "calculating": "Calculating price…",
       "perAdultShort": "/ adult",
-      "less": "Less"
+      "less": "Less",
+      "cancelShort": "Free cancellation until {date} ({days} days before departure)",
+      "demandShort": "{seats, plural, one {# seat} other {# seats}} left on {date} — the price may rise",
+      "childrenHintPlain": "under 12"
     },
     "individual": {
       "from": "from",
@@ -390,7 +429,9 @@
     "readLess": "Show less",
     "listTitle": "Destinations in Uzbekistan",
     "listText": "{count} regions — from ancient cities to mountains and deserts",
-    "notFound": "Destination not found"
+    "notFound": "Destination not found",
+    "heroShort": "{count} tours · {rating} ★",
+    "seasonShort": "Season"
   },
   "transferPage": {
     "meta": {
@@ -460,7 +501,8 @@
     "required": "Choose a place from the suggestions",
     "over": "This class takes at most {max} passengers",
     "mapLabel": "Route diagram",
-    "tooMany": "No more than {max} stops"
+    "tooMany": "No more than {max} stops",
+    "durationHours": "{h} h"
   },
   "addonsPage": {
     "meta": {
@@ -492,7 +534,10 @@
     "bindHint": "You can attach them to order {number} or check out separately",
     "bind": "Attach to order",
     "checkout": "Check out separately",
-    "empty": "Nothing selected"
+    "empty": "Nothing selected",
+    "kidsShort": "Kids",
+    "selectedShort": "{count, plural, one {# service} other {# services}}",
+    "checkoutShort": "Checkout"
   },
   "waitlistOffer": {
     "meta": {
@@ -523,7 +568,7 @@
     "next": "Next",
     "prev": "Back",
     "bookingTitle": "Booking",
-    "details": "Details",
+    "details": "Price details",
     "stepOf": "Step {n} of 5",
     "stepsNav": "Booking steps",
     "steps": {
@@ -547,7 +592,8 @@
       "points": "Bonus points ({count})",
       "penalty": "Late fee",
       "total": "Total",
-      "cancelNote": "Free cancellation until {date}. 100% refund within {days} days."
+      "cancelNote": "Free cancellation until {date}. 100% refund within {days} days.",
+      "metaSeats": "{dates} · seats {seats}"
     },
     "travellers": {
       "title": "Who's travelling",
@@ -590,7 +636,8 @@
         "GB": "United Kingdom",
         "DE": "Germany"
       },
-      "citizenshipPh": "Select a country"
+      "citizenshipPh": "Select a country",
+      "leadShort": "As in your passport"
     },
     "seats": {
       "title": "{count, plural, one {Choose # seat} other {Choose # seats}}",
@@ -612,7 +659,26 @@
       "progress": "{selected} of {total} seats selected",
       "need": "{count, plural, one {Choose # more seat} other {Choose # more seats}}",
       "assigned": "Seat assignment",
-      "next": "Next: add-ons"
+      "next": "Next: add-ons",
+      "titlePlain": "Choose seats",
+      "lead": "{vehicle}, {seats} seats. {count, plural, one {Choose # seat} other {Choose # seats}} — one per traveller.",
+      "vehicleTypes": {
+        "sedan": "Sedan",
+        "minivan": "Minivan",
+        "microbus": "Minibus"
+      },
+      "holdTitle": "Seats are held for you for {minutes} minutes",
+      "holdText": "While the timer runs, nobody else can buy these seats. If you don’t pay in time, the hold is released automatically.",
+      "yoursFull": "Selected by you",
+      "held": "Held for you",
+      "unavailable": "Unavailable",
+      "withSeatFull": "Seat with a child seat",
+      "yourSeats": "Your seats",
+      "childSuffix": "child",
+      "seatChild": "{seat} · child seat",
+      "unassign": "Remove seat {seat}",
+      "free_note": "Seat selection is free. You can skip it — we’ll seat you automatically.",
+      "notChosen": "not chosen"
     },
     "addons": {
       "title": "Add-ons",
@@ -623,7 +689,8 @@
       "comment": "Order comment (optional)",
       "commentPh": "E.g. vegetarian menu for one adult",
       "next": "Next: discounts",
-      "needChild": "Available if the order includes a child"
+      "needChild": "Available if the order includes a child",
+      "leadShort": "You can skip this"
     },
     "discounts": {
       "title": "Discounts and points",
@@ -643,7 +710,12 @@
       "max": "Maximum {cap}% of the order — {amount}",
       "refundTitle": "Everything is returned on cancellation",
       "refundText": "If you cancel the order, the promo code becomes active again and the points go back to your account.",
-      "next": "Next: review"
+      "next": "Next: review",
+      "pointsShort": "{count} points",
+      "pointsRateShort": "= {amount} · up to {cap}% of the order",
+      "spendAll": "Using all points: −{amount}",
+      "refundTextShort": "The promo code becomes active again and points return to your balance.",
+      "discountTotal": "Discount −{amount}"
     },
     "review": {
       "title": "Review your order",
@@ -667,7 +739,10 @@
       "cancelRestore": "The promo code and bonus points are restored",
       "accept": "I accept the offer agreement and the cancellation policy",
       "acceptReq": "You must accept the terms",
-      "pay": "Proceed to payment · {total}"
+      "pay": "Proceed to payment · {total}",
+      "lockedShort": "Price locked",
+      "payShort": "To payment",
+      "cancelShort": "Free cancellation until {date}. Refund within {refund} days."
     },
     "payment": {
       "title": "Payment",
@@ -699,7 +774,10 @@
       "cvcBad": "Invalid CVC",
       "holderBad": "Enter the name as on the card",
       "processing": "Processing…",
-      "holdGone": "Booking time expired — start again"
+      "holdGone": "Booking time expired — start again",
+      "ofTotal": "of {total} · deposit",
+      "payShort": "Pay",
+      "back": "Back to summary"
     },
     "status": {
       "pendingTitle": "Confirming payment…",
@@ -719,7 +797,9 @@
       "expiredText": "We released seats {seats} so others can buy them. Traveller details are saved — starting over takes a minute.",
       "expiredStill": "On {date} there {count, plural, one {is # free seat} other {are # free seats}} left",
       "restart": "Start over",
-      "backToTour": "Back to the tour"
+      "backToTour": "Back to the tour",
+      "s1Plain": "Payment created",
+      "expiredTextShort": "Seats {seats} were released. Traveller details are saved."
     },
     "request": {
       "title": "Request sent to the manager",
@@ -754,7 +834,11 @@
       "payTitle": "Next payment",
       "payText": "{amount} · {date}. We remind you {days} days before.",
       "paidTitle": "Paid in full",
-      "paidText": "No further payments are required."
+      "paidText": "No further payments are required.",
+      "titleShort": "Booking confirmed!",
+      "tgConnectFull": "Connect Telegram",
+      "voucherShort": "Voucher",
+      "seatsMeeting": "Seats {seats} · meeting {time}"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -812,7 +896,11 @@
       "sameText": "The voucher will be reissued automatically.",
       "pay": "Pay {amount}",
       "confirm": "Confirm change",
-      "back": "Back"
+      "back": "Back",
+      "lineAdults": "{count} adult × {price}",
+      "lineChildren": "{count} child × {price}",
+      "lineDemand": "Demand +{percent}%",
+      "lineDemandNone": "Demand"
     },
     "done": {
       "title": "Order changed",
@@ -820,7 +908,9 @@
       "refund": "Refund {amount} — within {days} days.",
       "download": "Download new voucher",
       "toOrder": "To the order"
-    }
+    },
+    "current": "Current",
+    "seatsKept": "Your previous seats {seats} are free on this departure — we kept them."
   },
   "auth": {
     "quote": "\"A night in a madrasa and sunrise over the Registan — the best thing this year\"",
@@ -939,7 +1029,8 @@
       "book": "Book",
       "seats": "Seats {seats}",
       "travellers": "{adults, plural, one {# adult} other {# adults}}{children, plural, =0 {} one {, # child} other {, # children}}",
-      "continue": "Continue booking"
+      "continue": "Continue booking",
+      "metaShort": "{dates} · {count} pax"
     },
     "order": {
       "back": "My orders",
@@ -1217,7 +1308,8 @@
         "cancelled": "Cancelled",
         "refunded": "Cancelled · refunded",
         "expired": "Booking expired",
-        "completed": "Trip completed"
+        "completed": "Trip completed",
+        "pending": "Not confirmed · unpaid"
       }
     },
     "about": {

@@ -1,16 +1,17 @@
 'use client';
 import { Button, Modal, Media, ReviewCard, Tag, cn, type ImageTone } from '@samanid/ui';
-import { Car, ChevronDown, Check, CircleCheck, Clock, Eye, MapPin, Ticket, X } from 'lucide-react';
+import { Car, ChevronDown, Check, CircleCheck, Clock, Eye, Info, MapPin, Shield, Ticket, X } from 'lucide-react';
 import type { DayPlan, Departure, ReviewsSummary, TourDetail } from '@samanid/api';
 import { intlLocale, type Locale } from '@samanid/i18n';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { dayMonth, money } from '@/lib/format';
+import { dateRange, dayMonth, money, monthYear } from '@/lib/format';
 import { useBooking } from './BookingContext';
 
 const tones: ImageTone[] = ['sky', 'sand', 'sunset', 'mountain', 'night'];
-const card = 'rounded-xl border border-dark-200 bg-white p-5 md:p-7 scroll-mt-28';
-const h2 = 'text-h5 text-dark-900 md:text-h4';
+// Mobile (22:3442): секции без карточек, прямо на фоне страницы; desktop — белые карточки 24px.
+const card = 'scroll-mt-28 md:rounded-2xl md:border md:border-dark-200 md:bg-white md:p-7';
+const h2 = 'text-h4 text-dark-900';
 
 export function Gallery({ tour }: { tour: TourDetail }) {
   const t = useTranslations('tourPage');
@@ -45,9 +46,16 @@ export function SectionNav({ count }: { count: number }) {
   const items = [['overview', t('overview')], ['program', t('program')], ['included', t('included')], ['dates', t('dates')], ['reviews', t('reviews', { count })]] as const;
   const [active, setActive] = useState('overview');
   useEffect(() => {
-    const io = new IntersectionObserver((es) => { const v = es.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]; if (v) setActive(v.target.id); }, { rootMargin: '-140px 0px -65% 0px' });
-    items.forEach(([id]) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    return () => io.disconnect();
+    // Активна последняя секция, верх которой прошёл под липкой навигацией; выше первой секции — «Обзор».
+    let raf = 0;
+    const update = () => {
+      raf = 0; let cur: string = items[0][0];
+      for (const [id] of items) { const el = document.getElementById(id); if (el && el.offsetParent !== null && el.getBoundingClientRect().top <= 160) cur = id; }
+      setActive(cur);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update(); window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -68,10 +76,10 @@ export function Overview({ tour }: { tour: TourDetail }) {
   const t = useTranslations('tourPage');
   return (
     <section id="overview" className={card}>
-      <h2 className={h2}>{t('about')}</h2>
-      <p className="mt-4 text-body-s text-dark-700 md:text-body-m">{tour.description}</p>
-      <ul className="mt-5 grid gap-3 md:grid-cols-2">
-        {tour.highlights.map((h) => <li key={h} className="flex items-center gap-2.5 text-body-s-medium text-dark-900 md:text-body-s md:font-normal"><CircleCheck className="size-5 shrink-0 text-success-600" aria-hidden="true" />{h}</li>)}
+      <h2 className={cn(h2, 'max-md:sr-only')}>{t('about')}</h2>
+      <p className="text-body-m text-dark-700 md:mt-4">{tour.description}</p>
+      <ul className="mt-4 grid gap-2.5 md:mt-5 md:grid-cols-2 md:gap-3">
+        {tour.highlights.map((h, i) => <li key={h} className={cn('flex items-center gap-2.5 text-body-s-medium text-dark-900 md:text-body-s md:font-normal', i >= 3 && 'max-md:hidden')}><CircleCheck className="size-5 shrink-0 text-success-600" aria-hidden="true" />{h}</li>)}
       </ul>
     </section>
   );
@@ -96,7 +104,7 @@ export function Itinerary({ days }: { days: DayPlan[] }) {
         {visible.map((d, i) => {
           const isOpen = open.has(i);
           return (
-            <li key={i} className="max-md:rounded-lg max-md:border max-md:border-dark-200 max-md:p-4 md:py-5">
+            <li key={i} className="max-md:rounded-lg max-md:border max-md:border-dark-200 max-md:bg-white max-md:p-[15px] md:py-5">
               <h3>
                 <button type="button" aria-expanded={isOpen} aria-controls={`day-${i}`} onClick={() => toggle(i)} className="flex w-full items-center gap-3 text-left focus-visible:focus-ring">
                   <span className={cn('rounded-full px-3 py-1.5 text-caption whitespace-nowrap', isOpen ? 'bg-primary-500 text-white' : 'bg-primary-50 text-primary-600')}>{t('day', { n: i + 1 })}</span>
@@ -114,7 +122,7 @@ export function Itinerary({ days }: { days: DayPlan[] }) {
           );
         })}
       </ul>
-      {!showAll && days.length > 3 && <button type="button" onClick={() => setShowAll(true)} className="mt-4 min-h-10 text-body-s-medium text-primary-500 md:hidden">{t('moreDays', { count: days.length - 3 })}</button>}
+      {!showAll && days.length > 3 && <button type="button" onClick={() => setShowAll(true)} className="mt-4 rounded-xs text-body-s-medium text-primary-500 focus-visible:focus-ring md:hidden">{t('moreDays', { count: days.length - 3 })}</button>}
     </section>
   );
 }
@@ -133,29 +141,31 @@ export function Included({ tour }: { tour: TourDetail }) {
   );
 }
 
+const shiftDays = (iso: string, n: number) => { const d = new Date(`${iso}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const wd = (iso: string, l: Locale) => { const s = new Intl.DateTimeFormat(intlLocale[l], { weekday: 'short', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`)); return s.charAt(0).toUpperCase() + s.slice(1).replace('.', ''); };
 
-export function Departures({ tour }: { tour: TourDetail }) {
+export function Departures({ tour, cancel }: { tour: TourDetail; cancel?: { days: number | null } }) {
   const t = useTranslations('tourPage');
   const locale = useLocale() as Locale;
   const { departureId, setDepartureId } = useBooking();
+  const selected = tour.departures.find((d) => d.id === departureId);
   const row = (d: Departure) => {
     const sel = d.id === departureId; const out = d.seats_left === 0; const low = !out && d.seats_left <= 3;
     const action = out ? t('dates.waitlist') : sel ? t('dates.selected') : t('dates.select');
     return (
       <li key={d.id}>
         <button type="button" role="radio" aria-checked={sel} onClick={() => { setDepartureId(d.id); if (out) document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' }); }}
-          className={cn('grid w-full items-center gap-x-4 gap-y-1 rounded-lg border px-4 py-3.5 text-left focus-visible:focus-ring max-md:grid-cols-[28px_1fr_auto] md:grid-cols-[200px_130px_130px_1fr_auto] md:px-4',
+          className={cn('grid w-full items-center gap-x-4 gap-y-1 rounded-[14px] border px-4 py-3.5 text-left focus-visible:focus-ring max-md:grid-cols-[28px_1fr_auto] md:grid-cols-[200px_130px_130px_1fr_auto] md:px-4',
             sel ? 'border-[1.5px] border-primary-500 bg-primary-50' : 'border-dark-200 bg-white hover:bg-dark-100')}>
-          <span aria-hidden="true" className={cn('flex size-5 items-center justify-center rounded-full border-[1.5px] md:hidden', sel ? 'border-primary-500' : out ? 'border-dark-200 bg-dark-100' : 'border-dark-300')}>{sel && <span className="size-2.5 rounded-full bg-primary-500" />}</span>
-          <span className="flex flex-col"><span className="text-body-m-medium text-dark-900">{dayMonth(d.from, locale)} — {dayMonth(d.to, locale)}</span>
+          <span aria-hidden="true" className={cn('flex size-[22px] items-center justify-center rounded-full border-[1.5px] md:hidden', sel ? 'border-primary-500' : out ? 'border-dark-200 bg-dark-100' : 'border-dark-300')}>{sel && <span className="size-2.5 rounded-full bg-primary-500" />}</span>
+          <span className="flex flex-col"><span className="text-body-m-medium text-dark-900"><span className="md:hidden">{dateRange(d.from, d.to, locale)}</span><span className="hidden md:inline">{dayMonth(d.from, locale)} — {dayMonth(d.to, locale)}</span></span>
             <span className="hidden text-caption text-dark-500 md:block">{wd(d.from, locale)} — {wd(d.to, locale)}</span>
             <span className={cn('text-caption md:hidden', out ? 'text-error-700' : low ? 'text-warning-700' : 'text-dark-500')}>{out ? t('dates.noSeats') : t('dates.seatsLeft', { count: d.seats_left })}</span></span>
-          <span className="hidden md:block">{out ? <span className="text-body-s-medium text-error-700">{t('dates.noSeats')}</span> : low ? <Tag type="seatsLeft">{t('dates.seatsOf', { free: d.seats_left, total: d.capacity })}</Tag> : <span className="text-body-s text-dark-900">{t('dates.seatsOf', { free: d.seats_left, total: d.capacity })}</span>}</span>
-          <span className="flex items-baseline gap-2 max-md:justify-end md:col-auto"><span className="text-h5 font-extrabold text-dark-900">{money(d.price, locale)}</span>{d.old_price && <span className="hidden text-caption text-dark-400 line-through md:inline">{money(d.old_price, locale)}</span>}</span>
+          <span className="hidden md:block">{out ? <span className="text-body-s-medium text-error-700">{t('dates.noSeats')}</span> : low ? <Tag type="seatsLeft">{t('dates.seatsOf', { free: d.seats_left, total: d.capacity })}</Tag> : <span className="text-body-s text-dark-700">{t('dates.seatsOf', { free: d.seats_left, total: d.capacity })}</span>}</span>
+          <span className={cn('flex items-baseline gap-2 max-md:justify-end md:col-auto', out && 'max-md:hidden')}><span className="text-h5 text-dark-900">{money(d.price, locale)}</span>{d.old_price && <span className="hidden text-caption text-dark-400 line-through md:inline">{money(d.old_price, locale)}</span>}</span>
           <span className="hidden md:block" />
-          <span className={cn('hidden min-h-10 items-center rounded-full px-5 text-button-m md:inline-flex', sel ? 'bg-primary-500 text-white' : 'border-[1.5px] border-primary-500 text-primary-500')}>{action}</span>
-          {out && <span className="text-body-s-medium text-primary-500 md:hidden">{t('dates.waitlist')} →</span>}
+          <span className={cn('hidden h-11 items-center rounded-full px-5 text-button-m md:inline-flex', sel ? 'bg-primary-500 text-white' : 'border-[1.5px] border-primary-500 text-primary-500')}>{action}</span>
+          {out && <span className="text-body-s-medium whitespace-nowrap text-primary-500 md:hidden">{t('dates.waitlistShort')} →</span>}
         </button>
       </li>
     );
@@ -164,8 +174,14 @@ export function Departures({ tour }: { tour: TourDetail }) {
     <section id="dates" className={card}>
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className={h2}>{t('dates.title')}</h2><p className="hidden text-caption text-dark-500 md:block">{t('dates.note', { percent: tour.child_discount_percent })}</p></div>
       <div className="mt-4 hidden grid-cols-[200px_130px_130px_1fr] gap-x-4 rounded-md bg-bg-page px-4 py-2.5 text-caption text-dark-500 md:grid"><span>{t('dates.departure')}</span><span>{t('dates.seats')}</span><span>{t('dates.price')}</span></div>
-      <ul role="radiogroup" aria-label={t('dates.title')} className="mt-4 flex flex-col gap-3 md:mt-3">{tour.departures.map(row)}</ul>
-      <p className="mt-4 flex items-start gap-2 text-caption text-dark-500"><Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{t('dates.dynamic')}</p>
+      <ul role="radiogroup" aria-label={t('dates.title')} className="mt-4 flex flex-col gap-4">{tour.departures.map(row)}</ul>
+      {/* Mobile 22:3578: плашка бесплатной отмены — показывается, только если API отдал срок. */}
+      {cancel?.days != null && selected && (
+        <p className="mt-4 flex items-center gap-2.5 rounded-[14px] bg-success-100 px-3.5 py-3 text-body-s-medium text-success-700 md:hidden">
+          <Shield className="size-[18px] shrink-0" aria-hidden="true" />{t('booking.cancelShort', { date: dayMonth(shiftDays(selected.from, -cancel.days), locale), days: cancel.days })}
+        </p>
+      )}
+      <p className="mt-4 flex items-center gap-2.5 text-caption text-dark-600 max-md:hidden"><Info className="size-5 shrink-0 text-dark-500" aria-hidden="true" />{t('dates.dynamic')}</p>
     </section>
   );
 }
@@ -176,10 +192,19 @@ export function RouteMap({ stops }: { stops: string[] }) {
   return (
     <section id="route" className={cn(card, 'max-md:hidden')}>
       <h2 className={h2}>{t('route')}</h2>
-      <div className="relative mt-5 h-[300px] overflow-hidden rounded-lg bg-primary-50">
-        <svg aria-hidden="true" viewBox="0 0 744 300" className="absolute inset-0 size-full"><path d="M60 230 C 200 250, 300 190, 430 150 S 600 80, 690 70" fill="none" stroke="var(--color-primary-500)" strokeWidth="2.5" strokeDasharray="6 6" /><circle cx="60" cy="230" r="9" fill="var(--color-accent-500)" /><circle cx="430" cy="150" r="7" fill="var(--color-primary-500)" /><circle cx="690" cy="70" r="9" fill="var(--color-dark-900)" /></svg>
+      {/* Figma 21:3008: плейсхолдер карты 300px, линия маршрута — ассет из макета, подписи остановок у точек. */}
+      <div className="relative mt-4 h-[300px] overflow-hidden rounded-lg bg-primary-50">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/figma/route.svg" alt="" width={744} height={300} className="absolute inset-0 h-full w-full" />
+        <ol aria-label={t('routeStops')}>
+          {stops.slice(0, 3).map((s, i) => (
+            <li key={s} className="absolute rounded-sm bg-white px-2.5 py-1.5 text-caption text-dark-900 shadow-sm" style={[{ left: '10.75%', top: 240 }, { left: '59.95%', top: 160 }, { left: '75.27%', top: 40 }][i]}>
+              <span className="sr-only">{i + 1}. </span>{s}
+            </li>
+          ))}
+        </ol>
+        {stops.length > 3 && <ol className="sr-only" start={4}>{stops.slice(3).map((s) => <li key={s}>{s}</li>)}</ol>}
       </div>
-      <ol aria-label={t('routeStops')} className="mt-4 flex flex-wrap gap-2">{stops.map((s, i) => <li key={s} className="rounded-sm bg-bg-page px-3 py-1.5 text-caption text-dark-700">{i + 1}. {s}</li>)}</ol>
     </section>
   );
 }
@@ -190,18 +215,18 @@ export function ReviewsBlock({ tour }: { tour: TourDetail }) {
   const locale = useLocale() as Locale;
   const s: ReviewsSummary = tour.reviews_summary;
   const initials = (n: string) => n.split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
-  const month = (d: string) => { const x = new Intl.DateTimeFormat(intlLocale[locale], { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`)); return x.charAt(0).toUpperCase() + x.slice(1); };
+  const month = (d: string) => monthYear(d, locale);
   return (
     <section id="reviews" className={card}>
-      <div className="flex items-baseline justify-between gap-2"><h2 className={h2}>{t('reviews.title')}</h2><p className="hidden text-caption text-dark-500 md:block">{t('reviews.afterTrip')}</p></div>
-      <div className="mt-5 flex flex-col gap-6 md:flex-row md:items-center">
+      <div className="flex items-baseline justify-between gap-2"><h2 className={h2}><span className="md:hidden">{t('reviews.titleShort', { rating: s.rating.toFixed(1) })}</span><span className="hidden md:inline">{t('reviews.title')}</span></h2><p className="hidden text-caption text-dark-500 md:block">{t('reviews.afterTrip')}</p></div>
+      <div className="mt-5 hidden flex-col gap-6 md:flex md:flex-row md:items-center">
         <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-1"><p className="text-[56px] leading-[64px] font-extrabold text-dark-900">{s.rating.toFixed(1)}</p>
           <div><p role="img" aria-label={t('reviews.stars', { n: s.rating.toFixed(1) })} className="flex gap-0.5">{Array.from({ length: 5 }, (_, i) => <svg key={i} aria-hidden="true" viewBox="0 0 24 24" className="size-[18px] fill-accent-500"><path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7L12 17.8 5.8 21.2l1.4-7L2 9.4l7-.9z" /></svg>)}</p><p className="mt-1 text-caption text-dark-500">{t('reviews.count', { count: s.count })}</p></div></div>
         <ul className="flex flex-1 flex-col gap-2" aria-label={t('reviews.title')}>{s.distribution.map((p, i) => (
-          <li key={i} className="flex items-center gap-3 text-caption text-dark-600"><span className="w-2">{5 - i}</span><span className="h-2 flex-1 overflow-hidden rounded-full bg-dark-100"><span className="block h-full rounded-full bg-accent-500" style={{ width: `${Math.max(p, p > 0 ? 1 : 0)}%` }} /></span><span className="w-8 text-right">{p}%</span></li>))}</ul>
+          <li key={i} className="flex items-center gap-3 text-caption text-dark-600"><span className="w-2">{5 - i}</span><span className="h-1.5 flex-1 overflow-hidden rounded-full bg-dark-100"><span className="block h-full rounded-full bg-accent-500" style={{ width: `${Math.max(p, p > 0 ? 1 : 0)}%` }} /></span><span className="w-8 text-right">{p}%</span></li>))}</ul>
       </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">{tour.reviews.map((r) => <ReviewCard key={r.id} initials={initials(r.author)} name={r.author} meta={`${month(r.date)} · ${r.tour_title}`} rating={r.rating} text={r.text} verifiedLabel={tv('verified')} />)}</div>
-      <Button variant="outline" className="mt-6 border-primary-500 text-primary-500">{t('reviews.all', { count: s.count })}</Button>
+      <div className="mt-4 grid gap-4 md:mt-6 md:grid-cols-2 max-md:[&>*:nth-child(n+2)]:hidden">{tour.reviews.map((r) => <ReviewCard key={r.id} initials={initials(r.author)} name={r.author} meta={`${month(r.date)} · ${r.tour_title}`} rating={r.rating} text={r.text} verifiedLabel={tv('verified')} />)}</div>
+      <Button variant="outline" className="mt-6 max-md:hidden">{t('reviews.all', { count: s.count })}</Button>
     </section>
   );
 }
