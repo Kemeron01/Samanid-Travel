@@ -85,7 +85,7 @@ function Notifications() {
   const refresh = () => qc.invalidateQueries({ queryKey: ['notifications'] });
   const unread = q.data?.unread ?? 0;
   const go = async (n: { id: string; href: string; read: boolean }) => { setOpen(false); if (!n.read) { await adminApi.notifications.markRead(n.id); void refresh(); } nav(n.href); };
-  const text = (n: { kind: NotificationKind; params: Record<string, string | number> }) => t(`shell.notif.${n.kind}`, { ...n.params, ...(typeof n.params.amount === 'number' ? { amount: f.money(n.params.amount) } : {}) });
+  const text = (n: { kind: NotificationKind; params: Record<string, string | number> }) => t(`shell.notif.${n.kind}`, { ...n.params, ...(typeof n.params.number === 'string' ? { number: n.params.number.replace(/-/g, '\u2011') } : {}), ...(typeof n.params.amount === 'number' ? { amount: f.money(n.params.amount) } : {}) });
   return (
     <Popover open={open} onOpenChange={setOpen} align="end" className="w-[380px] p-0"
       triggerLabel={unread ? t('shell.notificationsUnread', { count: unread }) : t('shell.notifications')}
